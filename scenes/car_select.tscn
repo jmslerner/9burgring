@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://car_select_scene"]
+
+[ext_resource type="Script" path="res://scripts/car_select.gd" id="1_carsel"]
+
+[node name="CarSelect" type="Node2D"]
+script = ExtResource("1_carsel")
