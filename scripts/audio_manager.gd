@@ -14,8 +14,14 @@ var _sfx_player:    AudioStreamPlayer
 var _engine_player: AudioStreamPlayer
 
 # ── Volume settings ───────────────────────────────────────────────────────────
-var music_volume: float = 0.8  setget _set_music_vol
-var sfx_volume:   float = 1.0  setget _set_sfx_vol
+var music_volume: float = 0.8:
+	set(v):
+		music_volume = clamp(v, 0.0, 1.0)
+		if _music_player:
+			_music_player.volume_db = linear_to_db(music_volume)
+var sfx_volume: float = 1.0:
+	set(v):
+		sfx_volume = clamp(v, 0.0, 1.0)
 
 # ── State ─────────────────────────────────────────────────────────────────────
 var _current_music: String = ""
@@ -85,15 +91,6 @@ func update_engine(speed_norm: float) -> void:
 
 func stop_engine() -> void:
 	_engine_player.stop()
-
-# ── Volume setters ────────────────────────────────────────────────────────────
-
-func _set_music_vol(v: float) -> void:
-	music_volume = clamp(v, 0.0, 1.0)
-	_music_player.volume_db = linear_to_db(music_volume)
-
-func _set_sfx_vol(v: float) -> void:
-	sfx_volume = clamp(v, 0.0, 1.0)
 
 # ── Internal loader ───────────────────────────────────────────────────────────
 

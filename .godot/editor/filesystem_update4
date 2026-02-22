@@ -1,0 +1,3 @@
+res://scenes/car_select.tscn
+res://scripts/audio_manager.gd
+res://scripts/road_renderer.gd

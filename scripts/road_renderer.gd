@@ -33,11 +33,11 @@ var player_x:   float = 0.0   # lateral offset in -1..1 range
 # ── Internal projected-segment cache ─────────────────────────────────────────
 class _PSeg:
 	var sx: float   # screen x of road centre
-	var sy: float   # screen y of road top edge
+	var sy: float   # screen y (large = bottom of screen, small = horizon)
 	var sw: float   # half-width of road on screen
-	var seg: Track.Segment
+	var seg         # Track.Segment
 
-var _proj: Array[_PSeg] = []
+var _proj: Array = []  # Array of _PSeg
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _process(_dt: float) -> void:
@@ -52,15 +52,12 @@ func _draw() -> void:
 
 # ── Sky + mountain silhouette ─────────────────────────────────────────────────
 func _draw_sky() -> void:
-	# Vertical gradient sky
-	var horizon := SH * 0.5
-	for y in range(int(horizon)):
-		var t := float(y) / horizon
-		draw_line(Vector2(0, y), Vector2(SW, y), C_SKY_TOP.lerp(C_SKY_BOT, t))
-	# Mountain band
-	var mt_h := 90.0
-	draw_rect(Rect2(0, horizon - mt_h, SW, mt_h * 0.6), C_MTN_DARK)
-	draw_rect(Rect2(0, horizon - mt_h * 0.45, SW, mt_h * 0.45), C_MTN_LIGHT)
+	# Fill full screen so there are no gaps between sky and road
+	draw_rect(Rect2(0, 0, SW, SH), C_SKY_BOT)
+	draw_rect(Rect2(0, 0, SW, SH * 0.38), C_SKY_TOP)
+	# Mountain silhouette bands just above the horizon
+	draw_rect(Rect2(0, SH * 0.38, SW, SH * 0.08), C_MTN_DARK)
+	draw_rect(Rect2(0, SH * 0.44, SW, SH * 0.06), C_MTN_LIGHT)
 
 # ── Project all visible segments ──────────────────────────────────────────────
 func _project_segments() -> void:
@@ -86,9 +83,11 @@ func _project_segments() -> void:
 		acc_x += seg.curve * seg_len
 		acc_y += seg.hill  * seg_len
 
-		# Project road centre to screen
+		# Project road centre to screen.
+		# Near segments → large sy (bottom of screen)
+		# Far segments  → small sy (near horizon at SH*0.5)
 		var sx := SW * 0.5 + scale * (acc_x - player_x * ROAD_WIDTH)
-		var sy := SH * 0.5 - scale * (CAM_HEIGHT + acc_y)
+		var sy := SH * 0.5 + scale * (CAM_HEIGHT - acc_y)
 		var sw := scale * ROAD_WIDTH
 
 		var p     := _PSeg.new()
@@ -100,39 +99,32 @@ func _project_segments() -> void:
 
 # ── Draw road from back to front ──────────────────────────────────────────────
 func _draw_road_strips() -> void:
-	var clip_y := int(SH)  # draws only below the horizon; shrinks each loop
-
+	# Draw back-to-front (far → near). Near strips naturally overwrite far ones.
 	for i in range(_proj.size() - 1, 0, -1):
-		var near := _proj[i - 1]   # closer to camera  → bottom of strip
-		var far  := _proj[i]       # farther from camera → top of strip
+		var near = _proj[i - 1]   # closer to camera  → bottom of strip (large sy)
+		var far  = _proj[i]       # farther from camera → top of strip  (small sy)
 
-		var y_bot := int(near.sy)
-		var y_top := int(far.sy)
-
-		if y_bot >= clip_y:
+		# Clamp to screen; skip zero-height strips
+		var y_bot := clampi(int(near.sy), 0, int(SH) - 1)
+		var y_top := clampi(int(far.sy),  0, int(SH) - 1)
+		if y_top >= y_bot:
 			continue
-		if y_top >= clip_y:
-			y_top = clip_y - 1
-
-		# Skip strips above the horizon
-		if y_bot < 0:
-			break
 
 		var even := near.seg.color_index == 0
 
 		# ── Grass ─────────────────────────────────────────────────────────
-		var gc := C_GRASS_D if even else C_GRASS_L
-		draw_rect(Rect2(0, y_top, SW, y_bot - y_top), gc)
+		draw_rect(Rect2(0, y_top, SW, y_bot - y_top),
+			C_GRASS_D if even else C_GRASS_L)
 
 		# ── Rumble strips ──────────────────────────────────────────────────
-		var rc := C_RMB_RED if even else C_RMB_WHT
 		_quad(far.sx,  y_top, far.sw  * 1.18,
-			  near.sx, y_bot, near.sw * 1.18, rc)
+			  near.sx, y_bot, near.sw * 1.18,
+			  C_RMB_RED if even else C_RMB_WHT)
 
 		# ── Road surface ───────────────────────────────────────────────────
-		var road_c := C_ROAD_D if even else C_ROAD_L
 		_quad(far.sx,  y_top, far.sw,
-			  near.sx, y_bot, near.sw, road_c)
+			  near.sx, y_bot, near.sw,
+			  C_ROAD_D if even else C_ROAD_L)
 
 		# ── Checkpoint flash ───────────────────────────────────────────────
 		if near.seg.is_checkpoint:
@@ -143,8 +135,6 @@ func _draw_road_strips() -> void:
 		if even:
 			_quad(far.sx,  y_top, far.sw  * 0.015,
 				  near.sx, y_bot, near.sw * 0.015, C_LANE)
-
-		clip_y = y_bot
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
