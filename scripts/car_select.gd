@@ -29,12 +29,12 @@ const GRID_LEFT  := 25.0
 const GRID_TOP   := 34.0
 
 # ── Stat-bar config ───────────────────────────────────────────────────────────
-const STAT_LABELS := ["HP", "HAND", "ACCEL", "BRAKE", "SPEED"]
-const STAT_KEYS   := ["hp", "handling", "accel", "braking", "top_speed"]
-const STAT_MAXES  := [550,  5,          5,       5,         200        ]
+const STAT_LABELS = ["HP", "HAND", "ACCEL", "BRAKE", "SPEED"]
+const STAT_KEYS   = ["hp", "handling", "accel", "braking", "top_speed"]
+const STAT_MAXES  = [550,  5,          5,       5,         200        ]
 
 # ── Car roster (all 8) ────────────────────────────────────────────────────────
-const CARS := [
+const CARS = [
 	{"driver":"Myles",   "car":"BMW Turbo",     "type":"4-Door",
 	 "hp":400,"handling":3,"accel":4,"braking":3,"top_speed":150,
 	 "body":Color("#e63946"),"accent":Color("#c1121f")},
@@ -62,7 +62,7 @@ const CARS := [
 ]
 
 # Soundtrack data
-const TRACKS := [
+const TRACKS = [
 	{"name":"WHITE VACANCY", "artist":"ZISO",
 	 "file":"res://audio/ZISO_-_White_Vacancy.mp3"},
 	{"name":"TURBO POWER",   "artist":"2050",

@@ -30,7 +30,7 @@ var _lbl_countdown:  Label
 var _lbl_stage:      Label
 var _overlay:        ColorRect   # game-over / finish screen
 
-const STAGE_NAMES := ["SANTA CRUZ", "FELTON", "THE CLIMB", "LOS GATOS"]
+const STAGE_NAMES = ["SANTA CRUZ", "FELTON", "THE CLIMB", "LOS GATOS"]
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
