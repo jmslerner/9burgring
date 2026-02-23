@@ -18,13 +18,13 @@ var C_RMB_B   = Color("#FFFFFF")   # white rumble
 var C_CHKPT   = Color(0.95, 0.85, 0.10)
 
 # ── Per-stage sky colors [top, bottom] ────────────────────────────────────────
-var SKY_TOP = [
+var SKY_TOP: Array[Color] = [
 	Color("#5BA3D9"),   # Stage 1 — coastal light blue
 	Color("#4488CC"),   # Stage 2 — afternoon blue
 	Color("#2A1A4A"),   # Stage 3 — dusk purple
 	Color("#CC4400"),   # Stage 4 — sunset orange
 ]
-var SKY_BOT = [
+var SKY_BOT: Array[Color] = [
 	Color("#D8EEF8"),   # Stage 1 — coastal haze white
 	Color("#DDAA44"),   # Stage 2 — afternoon gold
 	Color("#1A2A4A"),   # Stage 3 — dark blue dusk
@@ -32,13 +32,13 @@ var SKY_BOT = [
 ]
 
 # ── Per-stage mountain silhouette colors ──────────────────────────────────────
-var MTN_DARK = [
+var MTN_DARK: Array[Color] = [
 	Color("#2A4A2A"),   # Stage 1 — redwood dark
 	Color("#304A2A"),   # Stage 2 — forest
 	Color("#1A1A2A"),   # Stage 3 — dark ridge
 	Color("#4A2A10"),   # Stage 4 — warm ridge
 ]
-var MTN_LIGHT = [
+var MTN_LIGHT: Array[Color] = [
 	Color("#3A603A"),   # Stage 1
 	Color("#3A5A30"),   # Stage 2
 	Color("#28283A"),   # Stage 3
@@ -46,13 +46,13 @@ var MTN_LIGHT = [
 ]
 
 # ── Per-stage grass colors [dark, light] ──────────────────────────────────────
-var GRASS_D = [
+var GRASS_D: Array[Color] = [
 	Color("#2D5A27"),   # Stage 1 — redwood forest
 	Color("#2D5A27"),   # Stage 2 — redwood / river
 	Color("#3A6B35"),   # Stage 3 — mountain green
 	Color("#8B7D3C"),   # Stage 4 — vineyard gold
 ]
-var GRASS_L = [
+var GRASS_L: Array[Color] = [
 	Color("#234D1F"),   # Stage 1
 	Color("#234D1F"),   # Stage 2
 	Color("#2D5A27"),   # Stage 3
@@ -78,7 +78,7 @@ class _PSeg:
 	var scenery_l:     int
 	var scenery_r:     int
 
-var _proj: Array = []  # Array of _PSeg
+var _proj: Array[_PSeg] = []
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _process(_dt: float) -> void:
@@ -145,14 +145,14 @@ func _project_segments() -> void:
 
 	# Derive current stage from the nearest visible segment
 	if not _proj.is_empty():
-		_current_stage = (_proj[0] as _PSeg).stage
+		_current_stage = _proj[0].stage
 
 # ── Draw road from back to front ──────────────────────────────────────────────
 func _draw_road_strips() -> void:
 	# Draw back-to-front (far → near). Near strips naturally overwrite far ones.
 	for i in range(_proj.size() - 1, 0, -1):
-		var near: _PSeg = _proj[i - 1]   # closer to camera  → bottom of strip (large sy)
-		var far:  _PSeg = _proj[i]       # farther from camera → top of strip  (small sy)
+		var near := _proj[i - 1]   # closer to camera  → bottom of strip (large sy)
+		var far  := _proj[i]       # farther from camera → top of strip  (small sy)
 
 		# Clamp to screen; skip zero-height strips
 		var y_bot := clampi(int(near.sy), 0, int(SH) - 1)

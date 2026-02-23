@@ -78,16 +78,16 @@ var _blink_t:     float = 0.0
 var _confirming:  bool  = false
 var _track_index: int   = -1
 
-var _card_alpha:   Array = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-var _bar_t:        Array = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-var _car_textures: Array = []
+var _card_alpha:   Array[float] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+var _bar_t:        Array[float] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+var _car_textures: Array[ImageTexture] = []
 
 # Stat-bar gradient pairs (parallel to STAT_LABELS)
-var _stat_c1: Array = [
+var _stat_c1: Array[Color] = [
 	Color("#ff2d95"), Color("#00d4ff"),
 	Color("#ffe44d"), Color("#b537f2"), Color("#00d4ff"),
 ]
-var _stat_c2: Array = [
+var _stat_c2: Array[Color] = [
 	Color("#ff6b2b"), Color("#b537f2"),
 	Color("#ff6b2b"), Color("#ff2d95"), Color("#ffe44d"),
 ]
@@ -259,7 +259,7 @@ func _draw_card(i: int) -> void:
 		Color(C_NEON_BLUE.r, C_NEON_BLUE.g, C_NEON_BLUE.b, alpha * 0.85))
 
 	# Pixel-art car sprite (scaled 3×)
-	var tex := _car_textures[i] as ImageTexture
+	var tex := _car_textures[i]
 	if tex != null:
 		var sw3 := float(tex.get_width())  * 3.0
 		var sh3 := float(tex.get_height()) * 3.0
@@ -305,8 +305,8 @@ func _draw_stat_bars(i: int, r: Rect2, alpha: float) -> void:
 		# Gradient fill
 		if fill > 0.001:
 			var fw  := bar_w * fill
-			var c1: Color = _stat_c1[s]
-			var c2: Color = _stat_c2[s]
+			var c1 := _stat_c1[s]
+			var c2 := _stat_c2[s]
 			c1.a = alpha
 			c2.a = alpha
 			draw_polygon(
@@ -503,10 +503,10 @@ func _animate_cards_in() -> void:
 		bw.tween_interval(delay + 0.25)
 		bw.tween_method(_set_bar_t.bind(i), 0.0, 1.0, 0.80).set_ease(Tween.EASE_OUT)
 
-func _set_card_alpha(i: int, v: float) -> void:
+func _set_card_alpha(v: float, i: int) -> void:
 	_card_alpha[i] = v
 
-func _set_bar_t(i: int, v: float) -> void:
+func _set_bar_t(v: float, i: int) -> void:
 	_bar_t[i] = v
 
 # ── Input ─────────────────────────────────────────────────────────────────────

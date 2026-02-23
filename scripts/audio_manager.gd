@@ -94,7 +94,7 @@ func stop_engine() -> void:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-func _set_loop(stream, loop: bool) -> void:
+func _set_loop(stream: AudioStream, loop: bool) -> void:
 	if stream is AudioStreamOggVorbis:
 		(stream as AudioStreamOggVorbis).loop = loop
 	elif stream is AudioStreamWAV:
@@ -102,7 +102,7 @@ func _set_loop(stream, loop: bool) -> void:
 			AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
 		)
 
-func _load_audio(base_path: String):
+func _load_audio(base_path: String) -> AudioStream:
 	for ext: String in [".mp3", ".ogg", ".wav"]:
 		var path: String = base_path + ext
 		if ResourceLoader.exists(path):
