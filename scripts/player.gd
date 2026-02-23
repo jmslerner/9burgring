@@ -19,6 +19,7 @@ var off_road:   bool  = false  # true when car is outside road bounds
 # ── Signals ───────────────────────────────────────────────────────────────────
 signal checkpoint_passed(index: int)
 signal track_finished
+signal wall_hit
 
 # ── References (set by game.gd) ───────────────────────────────────────────────
 var track: Track
@@ -28,9 +29,10 @@ var track: Track
 
 # Internal
 var _passed_checkpoints: Array[int] = []
-var _finished:    bool  = false
-var _boost_t:     float = 0.0   # seconds remaining on speed boost
-var _boost_mult:  float = 1.0   # current max_speed multiplier (1.0 = normal)
+var _finished:       bool  = false
+var _boost_t:        float = 0.0   # seconds remaining on speed boost
+var _boost_mult:     float = 1.0   # current max_speed multiplier (1.0 = normal)
+var _wall_cooldown:  float = 0.0   # prevents wall_hit signal from spamming
 
 # ─────────────────────────────────────────────────────────────────────────────
 func apply_car_stats(stats: Dictionary) -> void:
@@ -55,8 +57,9 @@ func reset() -> void:
 	position_x = 0.0
 	off_road   = false
 	_finished  = false
-	_boost_t    = 0.0
-	_boost_mult = 1.0
+	_boost_t       = 0.0
+	_boost_mult    = 1.0
+	_wall_cooldown = 0.0
 	_passed_checkpoints.clear()
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -74,6 +77,9 @@ func _update_boost(dt: float) -> void:
 			_boost_mult = 1.0
 
 func _handle_input(dt: float) -> void:
+	if _wall_cooldown > 0.0:
+		_wall_cooldown -= dt
+
 	# Throttle / brake
 	if Input.is_action_pressed("accelerate"):
 		speed += acceleration * dt
@@ -96,10 +102,13 @@ func _handle_input(dt: float) -> void:
 
 	# Road-edge check
 	off_road = absf(position_x) > 1.0
-	# Soft wall: push back but allow slight overshoot
+	# Hard wall: bounce back, big one-shot speed penalty + signal
 	if absf(position_x) > 1.3:
 		position_x = sign(position_x) * 1.3
-		speed *= 0.96   # gravel scrub
+		if _wall_cooldown <= 0.0:
+			speed *= 0.45          # slam into barrier — big slowdown
+			wall_hit.emit()
+			_wall_cooldown = 2.0   # won't fire again for 2 s
 
 func _update_position(dt: float) -> void:
 	position_z += speed * dt

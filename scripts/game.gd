@@ -52,14 +52,16 @@ var _lbl_checkpoint: Label
 var _lbl_countdown:  Label
 var _lbl_stage:      Label
 var _lbl_deer_hit:   Label
+var _lbl_wall_hit:   Label
 var _overlay:        ColorRect
 var _accel_bar:      ColorRect   # green GAS fill bar
 var _brake_bar:      ColorRect   # red  BRK fill bar
 
 # ── Deer state ────────────────────────────────────────────────────────────────
 # Exactly one deer per run, placed at a random position on the track.
-var _deer:       Array = []   # 0 or 1 entry: {z: float, x: float}
-var _deer_hit_t: float = 0.0
+var _deer:        Array = []   # 0 or 1 entry: {z: float, x: float}
+var _deer_hit_t:  float = 0.0
+var _wall_hit_t:  float = 0.0
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -90,6 +92,7 @@ func _build_scene() -> void:
 	add_child(_player)
 	_player.checkpoint_passed.connect(_on_checkpoint_passed)
 	_player.track_finished.connect(_trigger_finish)
+	_player.wall_hit.connect(_on_wall_hit)
 
 	# Coloured rectangle car placeholder
 	var car_rect      := ColorRect.new()
@@ -127,6 +130,12 @@ func _build_hud() -> void:
 	_lbl_deer_hit.size.x               = 1024.0
 	_lbl_deer_hit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lbl_deer_hit.add_theme_color_override("font_color", Color(1.0, 0.55, 0.05))
+
+	# THAT HURTS! wall-hit alert — centred just below deer label
+	_lbl_wall_hit   = _make_label("", Vector2(0, 320), 46)
+	_lbl_wall_hit.size.x               = 1024.0
+	_lbl_wall_hit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lbl_wall_hit.add_theme_color_override("font_color", Color(1.0, 0.10, 0.10))
 
 	# ── Pedal bars ─────────────────────────────────────────────────────────
 	var _make_pedal_bg := func(x: float) -> void:
@@ -220,6 +229,7 @@ func _do_racing(dt: float) -> void:
 		return
 
 	_tick_deer(dt)
+	_tick_wall_hit(dt)
 
 	var accel := Input.is_action_pressed("accelerate")
 	var brake := Input.is_action_pressed("brake")
@@ -278,6 +288,18 @@ func _tick_deer(dt: float) -> void:
 	_renderer.deer_list.clear()
 	for d: Dictionary in _deer:
 		_renderer.deer_list.append({"z": d["z"], "x": d["x"]})
+
+# ── Wall hit ──────────────────────────────────────────────────────────────────
+func _tick_wall_hit(dt: float) -> void:
+	if _wall_hit_t > 0.0:
+		_wall_hit_t -= dt
+		if _wall_hit_t <= 0.0:
+			_lbl_wall_hit.text = ""
+
+func _on_wall_hit() -> void:
+	_wall_hit_t        = 1.8
+	_lbl_wall_hit.text = "THAT HURTS!"
+	AudioManager.play_sfx("hit")
 
 # ── Checkpoint ────────────────────────────────────────────────────────────────
 func _on_checkpoint_passed(_idx: int) -> void:
