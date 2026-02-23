@@ -43,9 +43,23 @@ func play_music(track_name: String) -> void:
 	if track_name == _current_music:
 		return
 	_current_music = track_name
-	var stream = _load_audio("res://assets/audio/music/" + track_name)
+	var stream = _load_audio("res://audio/" + track_name)
 	if stream == null:
 		push_warning("AudioManager: music '%s' not found" % track_name)
+		return
+	_set_loop(stream, true)
+	_music_player.stream    = stream
+	_music_player.volume_db = linear_to_db(music_volume)
+	_music_player.play()
+
+# Play music from a full resource path, e.g. "res://audio/Theme Songs/track.mp3"
+func play_music_file(full_path: String) -> void:
+	if full_path == _current_music:
+		return
+	_current_music = full_path
+	var stream = _load_audio(full_path.get_basename())
+	if stream == null:
+		push_warning("AudioManager: music file '%s' not found" % full_path)
 		return
 	_set_loop(stream, true)
 	_music_player.stream    = stream

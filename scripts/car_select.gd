@@ -62,11 +62,15 @@ var CARS = [
 ]
 
 # Soundtrack data
-const TRACKS = [
+var TRACKS = [
 	{"name":"WHITE VACANCY", "artist":"ZISO",
-	 "file":"res://audio/ZISO_-_White_Vacancy.mp3"},
+	 "file":"res://audio/Theme Songs/ZISO - White Vacancy.mp3"},
 	{"name":"TURBO POWER",   "artist":"2050",
-	 "file":"res://audio/2050_-_Turbo_Power.mp3"},
+	 "file":"res://audio/2050 - Turbo Power.mp3"},
+	{"name":"PINKY POP",     "artist":"Danny Shields",
+	 "file":"res://audio/Theme Songs/Danny Shields - Pinky Pop.mp3"},
+	{"name":"ENID'S THEME",  "artist":"Night Rider 87",
+	 "file":"res://audio/Theme Songs/Night Rider 87 - Enids Theme.mp3"},
 ]
 
 # ── Runtime state ─────────────────────────────────────────────────────────────
@@ -549,6 +553,8 @@ func _select_track(t: int) -> void:
 func _confirm_car() -> void:
 	_confirming = true
 	GameState.selected_car = CARS[_car_index]
+	var ti := _track_index if _track_index >= 0 else 0
+	GameState.selected_music_file = TRACKS[ti]["file"]
 
 	var sfx = _try_load("res://audio/Good_choice.mp3")
 	if sfx != null:

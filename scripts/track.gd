@@ -20,9 +20,9 @@ class Segment:
 	var hill:          float  # vertical delta (neg=down, pos=up)
 	var color_index:   int    # 0 or 1, alternates every RUMBLE_LENGTH segs
 	var is_checkpoint: bool
-	var stage:         int    # 1=Santa Cruz, 2=Felton, 3=Climb, 4=Descent
-	var scenery_l:     int    # left roadside object  (SCENERY_* constant)
-	var scenery_r:     int    # right roadside object
+	var stage:         int    # 1=coastal  2=river valley  3=climb  4=descent
+	var scenery_l:     int
+	var scenery_r:     int
 
 	func _init(i: int, s: int = 1) -> void:
 		index         = i
@@ -53,7 +53,6 @@ func _straight(count: int, stage: int = 1) -> void:
 	for _i in range(count):
 		_seg(0.0, 0.0, stage)
 
-# Smoothly interpolate a section: ramp up, hold, ramp down
 func _section(count: int, curve: float, hill: float, stage: int = 1) -> void:
 	var ramp := mini(count / 4, 8)
 	for i in range(count):
@@ -71,55 +70,169 @@ func _mark_checkpoint() -> void:
 		return
 	segments.back().is_checkpoint = true
 
-# ── SR 9: Santa Cruz → Los Gatos (900 segments, 3 checkpoints) ───────────────
+# ── SR 9: Santa Cruz → Los Gatos  (~8 000 segments, 8 checkpoints) ────────────
 #
-# Stage 1 (0–199):   Santa Cruz → Felton   — coastal town, redwood forest
-# Stage 2 (200–379): Felton → Boulder Creek — mountain towns, river valley
-# Stage 3 (380–699): The Climb              — tight hairpins, steep ascent
-# Stage 4 (700–899): The Descent            — sweeping curves, vineyard, sunset
+# Stage 1 (0   – 1999): Santa Cruz coastal → Scotts Valley — flat, redwoods
+# Stage 2 (2000– 3999): Felton → Boulder Creek — river valley, S-curves
+# Stage 3 (4000– 5999): The Climb — hairpins, steep ascent, pine forest
+# Stage 4 (6000– 7999): The Descent — fast sweeps, vineyard, sunset
 #
 func _build_track() -> void:
 
-	# ── STAGE 1: Santa Cruz → Felton ──────────────────────────────────────
-	_straight(30, 1)                        # city exit, flat
-	_section(30,  0.003,  0.002, 1)         # gentle right, slight rise
-	_section(15, -0.004,  0.000, 1)         # S-curve left
-	_section(15,  0.004,  0.000, 1)         # S-curve right
-	_section(40, -0.005,  0.002, 1)         # long left into redwood forest
-	_straight(30, 1)                        # straight through redwoods
-	_section(40,  0.004,  0.002, 1)         # right curve into Felton
-	_mark_checkpoint()                      # CHECKPOINT 1 — Felton (seg 199)
+	# ── STAGE 1 A: City exit & beach flats  (segs 0–1059) ─────────────────
+	_straight(50, 1)                         # city exit, flat
+	_section(80,  0.005,  0.001, 1)          # gentle right, slight rise
+	_section(50, -0.007,  0.000, 1)          # S-curve left
+	_section(50,  0.007,  0.000, 1)          # S-curve right
+	_straight(80, 1)                         # beach stretch
+	_section(70, -0.008,  0.001, 1)          # long sweeping left
+	_section(80,  0.006,  0.002, 1)          # right into redwoods
+	_straight(100, 1)                        # redwood straight
+	_section(80, -0.009,  0.001, 1)          # winding left
+	_section(80,  0.008,  0.002, 1)          # winding right
+	_section(50, -0.005,  0.001, 1)          # ease
+	_straight(60, 1)
+	_section(80,  0.007,  0.002, 1)          # right curve
+	_section(70, -0.006,  0.001, 1)          # left lean
+	_straight(80, 1)
+	# ~1060 segments — CHECKPOINT 1 (Scotts Valley)
+	_mark_checkpoint()
 
-	# ── STAGE 2: Felton → Boulder Creek ───────────────────────────────────
-	_straight(30, 2)                        # town zone, flat
-	_section(20, -0.005,  0.001, 2)         # S-curve left along river
-	_section(20,  0.005,  0.001, 2)         # S-curve right
-	_section(40,  0.006,  0.002, 2)         # long right, bridge crossing
-	_section(40, -0.005,  0.001, 2)         # left through Ben Lomond
-	_section(30, -0.003,  0.002, 2)         # into Boulder Creek
-	_mark_checkpoint()                      # CHECKPOINT 2 — Boulder Creek (seg 379)
+	# ── STAGE 1 B: Through the redwood corridor  (segs 1060–1999) ─────────
+	_section(60,  0.008,  0.001, 1)
+	_section(60, -0.007,  0.002, 1)
+	_straight(80, 1)
+	_section(70,  0.009,  0.002, 1)
+	_section(80, -0.006,  0.001, 1)
+	_straight(60, 1)
+	_section(70,  0.007,  0.002, 1)
+	_section(80, -0.008,  0.001, 1)
+	_straight(100, 1)
+	_section(60,  0.006,  0.002, 1)
+	_section(60, -0.005,  0.001, 1)
+	_straight(80, 1)
+	_section(50,  0.007,  0.001, 1)
+	_straight(30, 1)
+	# ~1940 — pad to 2000
+	_straight(60, 1)
+	# CHECKPOINT 2 (Felton / stage 1→2 boundary) at seg ~2000
+	_mark_checkpoint()
 
-	# ── STAGE 3: The Climb ─────────────────────────────────────────────────
-	_section(40,  0.003,  0.005, 3)         # steep uphill begins, gentle curves
-	_section(40, -0.009,  0.006, 3)         # tight left hairpin + uphill
-	_straight(10, 3)                        # short breather
-	_section(30,  0.000,  0.007, 3)         # steep uphill, cliff edge
-	_section(40,  0.010,  0.005, 3)         # tight right hairpin
-	_section(20, -0.005,  0.003, 3)         # left lean recovery
-	_section(40, -0.008,  0.004, 3)         # S-curve left, continued climb
-	_section(40,  0.006,  0.003, 3)         # S-curve right
-	_section(40, -0.011,  0.005, 3)         # very tight left hairpin (Castle Rock)
-	_section(40,  0.007,  0.003, 3)         # sweeping right, uphill eases
-	_mark_checkpoint()                      # CHECKPOINT 3 — Saratoga Gap (seg 699)
+	# ── STAGE 2 A: Felton river valley  (segs 2000–2899) ──────────────────
+	_straight(50, 2)                         # Felton town flat
+	_section(80, -0.008,  0.001, 2)          # S-curve left along river
+	_section(80,  0.008,  0.001, 2)          # S-curve right
+	_section(90,  0.009,  0.002, 2)          # long right, bridge crossing
+	_section(80, -0.008,  0.001, 2)          # left through Ben Lomond
+	_straight(60, 2)
+	_section(70,  0.007,  0.002, 2)
+	_section(70, -0.009,  0.001, 2)
+	_section(60,  0.006,  0.002, 2)
+	_straight(80, 2)
+	_section(80, -0.007,  0.002, 2)
+	_section(60,  0.008,  0.001, 2)
+	_straight(40, 2)
+	# ~900 segments — CHECKPOINT 3 (Ben Lomond)
+	_mark_checkpoint()
 
-	# ── STAGE 4: The Descent ───────────────────────────────────────────────
-	_straight(40, 4)                        # summit vista, panoramic moment
-	_section(40,  0.007, -0.006, 4)         # fast right, steep downhill begins
-	_section(20, -0.005, -0.005, 4)         # S-curves downhill left
-	_section(20,  0.005, -0.005, 4)         # S-curves downhill right
-	_section(40, -0.006, -0.004, 4)         # long sweeping left, vineyard scenery
-	_section(20,  0.003, -0.002, 4)         # gentle curves, entering Saratoga
-	_straight(20, 4)                        # final straight into Los Gatos
+	# ── STAGE 2 B: Ben Lomond → Boulder Creek  (segs 2900–3999) ──────────
+	_section(80, -0.008,  0.002, 2)
+	_section(70,  0.007,  0.001, 2)
+	_straight(80, 2)
+	_section(70, -0.009,  0.001, 2)
+	_section(80,  0.008,  0.002, 2)
+	_straight(60, 2)
+	_section(60, -0.007,  0.001, 2)
+	_section(70,  0.008,  0.002, 2)
+	_straight(80, 2)
+	_section(60, -0.006,  0.002, 2)
+	_section(70,  0.009,  0.001, 2)
+	_straight(80, 2)
+	_section(60, -0.007,  0.001, 2)
+	_section(70,  0.008,  0.002, 2)
+	_straight(70, 2)
+	# ~1100 segments in 2B — CHECKPOINT 4 (Boulder Creek / stage 2→3 boundary)
+	_mark_checkpoint()
+
+	# ── STAGE 3 A: The Climb — lower hairpins  (segs 4000–4999) ──────────
+	_section(60,  0.006,  0.007, 3)          # steep uphill begins
+	_section(80, -0.014,  0.008, 3)          # tight left hairpin
+	_section(80,  0.015,  0.008, 3)          # tight right hairpin
+	_straight(20, 3)                         # breather ledge
+	_section(60,  0.000,  0.009, 3)          # steep cliff straight
+	_section(80,  0.016,  0.007, 3)          # tight right hairpin
+	_section(80, -0.013,  0.006, 3)          # left recovery
+	_section(70,  0.011,  0.007, 3)          # right lean
+	_straight(30, 3)
+	_section(80, -0.017,  0.008, 3)          # very tight left (Castle Rock)
+	_section(70,  0.012,  0.006, 3)          # recovery sweep
+	_section(70, -0.013,  0.007, 3)          # left again
+	_straight(40, 3)
+	_section(80,  0.014,  0.008, 3)
+	_section(70, -0.010,  0.006, 3)
+	_straight(30, 3)
+	# ~1000 segments — CHECKPOINT 5 (mid-Climb)
+	_mark_checkpoint()
+
+	# ── STAGE 3 B: The Climb — upper hairpins  (segs 5000–5999) ──────────
+	_section(80,  0.013,  0.007, 3)
+	_section(80, -0.015,  0.008, 3)
+	_section(70,  0.016,  0.006, 3)
+	_straight(30, 3)
+	_section(80, -0.012,  0.005, 3)
+	_section(80,  0.013,  0.006, 3)
+	_section(70, -0.010,  0.005, 3)
+	_straight(40, 3)
+	_section(70,  0.011,  0.005, 3)
+	_section(80, -0.014,  0.006, 3)
+	_section(70,  0.009,  0.004, 3)
+	_straight(60, 3)
+	_section(70, -0.007,  0.004, 3)
+	_section(60,  0.010,  0.005, 3)
+	_straight(50, 3)
+	_straight(10, 3)                         # summit approach
+	# ~1000 segments — CHECKPOINT 6 (Saratoga Gap / stage 3→4)
+	_mark_checkpoint()
+
+	# ── STAGE 4 A: Fast descent — upper section  (segs 6000–6909) ────────
+	_straight(60, 4)                         # summit vista
+	_section(80,  0.010, -0.008, 4)          # fast right, steep descent begins
+	_section(80, -0.007, -0.007, 4)          # S-curves downhill left
+	_section(80,  0.009, -0.007, 4)          # S-curves downhill right
+	_section(100,-0.009, -0.006, 4)          # long sweeping left, vineyard views
+	_section(70,  0.006, -0.004, 4)          # easing curves
+	_straight(60, 4)
+	_section(80, -0.008, -0.005, 4)
+	_section(70,  0.010, -0.006, 4)
+	_section(80, -0.007, -0.004, 4)
+	_straight(80, 4)
+	_section(70,  0.009, -0.005, 4)
+	# ~910 segments — CHECKPOINT 7 (Los Gatos approach)
+	_mark_checkpoint()
+
+	# ── STAGE 4 B: Saratoga → Los Gatos  (segs 6910–7999) ────────────────
+	_section(70, -0.007, -0.003, 4)
+	_section(80,  0.008, -0.002, 4)
+	_straight(80, 4)
+	_section(70, -0.006, -0.002, 4)
+	_section(80,  0.007, -0.003, 4)
+	_straight(60, 4)
+	_section(70, -0.005, -0.002, 4)
+	_section(60,  0.006, -0.001, 4)
+	_straight(80, 4)
+	_section(70, -0.004, -0.002, 4)          # easing into Los Gatos
+	_section(70,  0.008, -0.002, 4)
+	_straight(80, 4)
+	_section(70, -0.005, -0.001, 4)
+	_section(60,  0.006, -0.001, 4)
+	_straight(70, 4)
+	_section(70, -0.004, -0.002, 4)
+	_section(80,  0.007, -0.003, 4)
+	_straight(60, 4)
+	# ~1090 segments — CHECKPOINT 8 (near finish)
+	_mark_checkpoint()
+
+	_straight(10, 4)                         # finish run-in
 
 	track_length = float(segments.size()) * SEGMENT_LENGTH
 	_assign_scenery()
@@ -127,25 +240,25 @@ func _build_track() -> void:
 # ── Scenery placement ─────────────────────────────────────────────────────────
 func _assign_scenery() -> void:
 	for seg: Segment in segments:
-		var alt := seg.index % 2 == 0   # alternate segments for natural spacing
+		var alt := seg.index % 2 == 0
 		match seg.stage:
-			1:  # Santa Cruz → Felton: open city exit, then dense redwood forest
-				if seg.index >= 12 and alt:
+			1:  # Coastal → redwood forest after city exit
+				if seg.index >= 15 and alt:
 					seg.scenery_l = SCENERY_REDWOOD
 					seg.scenery_r = SCENERY_REDWOOD
-			2:  # Felton → Boulder Creek: redwoods with town gap breaks
+			2:  # River valley: redwoods with occasional town gaps
 				if alt and (seg.index % 14) > 3:
 					seg.scenery_l = SCENERY_REDWOOD
 					seg.scenery_r = SCENERY_REDWOOD
-			3:  # The Climb: pine forest, guardrails replace pines on hairpins
+			3:  # Climb: pine forest; guardrails replace pines on tight hairpins
 				if alt:
 					seg.scenery_l = SCENERY_PINE
 					seg.scenery_r = SCENERY_PINE
-				if absf(seg.curve) > 0.005:
+				if absf(seg.curve) > 0.008:
 					seg.scenery_l = SCENERY_GUARDRAIL
 					seg.scenery_r = SCENERY_GUARDRAIL
-			4:  # Descent: oaks on right side only (open valley view on left)
-				if seg.index >= 740 and seg.index % 3 == 0:
+			4:  # Descent: oaks on right side (open valley view on left)
+				if alt:
 					seg.scenery_r = SCENERY_OAK
 
 # ── Query ─────────────────────────────────────────────────────────────────────

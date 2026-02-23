@@ -26,7 +26,9 @@ var track: Track
 
 # Internal
 var _passed_checkpoints: Array[int] = []
-var _finished: bool = false
+var _finished:    bool  = false
+var _boost_t:     float = 0.0   # seconds remaining on speed boost
+var _boost_mult:  float = 1.0   # current max_speed multiplier (1.0 = normal)
 
 # ─────────────────────────────────────────────────────────────────────────────
 func apply_car_stats(stats: Dictionary) -> void:
@@ -41,20 +43,33 @@ func apply_car_stats(stats: Dictionary) -> void:
 	deceleration = lerp(500.0,  1000.0, (ac - 1.0) / 4.0)
 	brake_force  = lerp(1200.0, 3600.0, (br - 1.0) / 4.0)
 
+func apply_speed_boost(duration: float, mult: float) -> void:
+	_boost_t    = duration
+	_boost_mult = mult
+
 func reset() -> void:
 	speed      = 0.0
 	position_z = 0.0
 	position_x = 0.0
 	off_road   = false
 	_finished  = false
+	_boost_t    = 0.0
+	_boost_mult = 1.0
 	_passed_checkpoints.clear()
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _physics_process(dt: float) -> void:
+	_update_boost(dt)
 	_handle_input(dt)
 	_update_position(dt)
 	_check_checkpoints()
 	_update_sprite()
+
+func _update_boost(dt: float) -> void:
+	if _boost_t > 0.0:
+		_boost_t -= dt
+		if _boost_t <= 0.0:
+			_boost_mult = 1.0
 
 func _handle_input(dt: float) -> void:
 	# Throttle / brake
@@ -69,7 +84,7 @@ func _handle_input(dt: float) -> void:
 	if off_road:
 		speed -= deceleration * 1.5 * dt
 
-	speed = clamp(speed, 0.0, max_speed)
+	speed = clamp(speed, 0.0, max_speed * _boost_mult)
 
 	# Steering (scales with speed for feel)
 	var steer := Input.get_axis("steer_left", "steer_right")
@@ -110,5 +125,5 @@ func _update_sprite() -> void:
 	_sprite.rotation = lerp(_sprite.rotation, steer * 0.08, 0.2)
 
 # ─────────────────────────────────────────────────────────────────────────────
-func get_speed_kmh() -> int:
-	return int(speed / 20.0)
+func get_speed_mph() -> int:
+	return int(speed * 0.031)
