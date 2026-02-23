@@ -7,7 +7,6 @@ const INITIAL_TIME     := 60.0   # seconds at race start
 const CHECKPOINT_BONUS := 120.0  # seconds added per checkpoint (8 CPs → ~16 min max)
 
 # ── Deer obstacle settings ─────────────────────────────────────────────────────
-const DEER_AHEAD      := 4000.0  # spawn deer this many world-units ahead of player
 const DEER_HIT_Z      := 280.0   # z-depth window for collision (world units)
 const DEER_HIT_X      := 0.30    # lateral half-width for collision
 const DEER_SPEED_MULT := 0.40    # speed multiplied by this on deer impact
@@ -58,10 +57,9 @@ var _accel_bar:      ColorRect   # green GAS fill bar
 var _brake_bar:      ColorRect   # red  BRK fill bar
 
 # ── Deer state ────────────────────────────────────────────────────────────────
-# Each entry: {z: float, x: float}
-var _deer:        Array = []
-var _next_deer_z: float = 3000.0
-var _deer_hit_t:  float = 0.0
+# Exactly one deer per run, placed at a random position on the track.
+var _deer:       Array = []   # 0 or 1 entry: {z: float, x: float}
+var _deer_hit_t: float = 0.0
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -76,6 +74,10 @@ func _ready() -> void:
 
 func _build_scene() -> void:
 	_track = Track.new()
+
+	# Place exactly one deer at a random point on the track
+	var deer_z := randf_range(3000.0, _track.track_length - 1000.0)
+	_deer.append({"z": deer_z, "x": randf_range(-0.68, 0.68)})
 
 	_renderer = RoadRenderer.new()
 	_renderer.track = _track
@@ -249,23 +251,6 @@ func _do_end_screen() -> void:
 
 func _tick_deer(dt: float) -> void:
 	var pz := _player.position_z
-
-	# Spawn deer ahead using a varied pattern (singles, pairs, and long gaps)
-	while _next_deer_z < pz + DEER_AHEAD and _next_deer_z < _track.track_length - 600.0:
-		var r := randf()
-		if r < 0.12:
-			# Long empty stretch — no deer, big gap
-			_next_deer_z += 1600.0 + randf_range(0.0, 800.0)
-		elif r < 0.35:
-			# Pair of deer close together
-			_deer.append({"z": _next_deer_z, "x": randf_range(-0.72, 0.72)})
-			_deer.append({"z": _next_deer_z + randf_range(100.0, 260.0),
-						  "x": randf_range(-0.72, 0.72)})
-			_next_deer_z += 1100.0 + randf_range(0.0, 500.0)
-		else:
-			# Single deer
-			_deer.append({"z": _next_deer_z, "x": randf_range(-0.72, 0.72)})
-			_next_deer_z += 480.0 + randf_range(0.0, 700.0)
 
 	# Collision check (iterate backwards to safely remove)
 	var i := _deer.size() - 1
