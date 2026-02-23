@@ -60,9 +60,10 @@ var GRASS_L: Array[Color] = [
 ]
 
 # ── State (set by game.gd each frame) ────────────────────────────────────────
-var track:      Track
-var player_z:   float = 0.0   # distance travelled along track
-var player_x:   float = 0.0   # lateral offset in -1..1 range
+var track:         Track
+var player_z:      float = 0.0   # distance travelled along track
+var player_x:      float = 0.0   # lateral offset in -1..1 range
+var cam_y_offset:  float = 0.0   # vertical camera bob in screen pixels (set by game.gd)
 
 # ── Deer obstacle positions (set by game.gd each frame) ───────────────────────
 # Each entry: {z: float, x: float}
@@ -166,8 +167,9 @@ func _draw_road_strips() -> void:
 		var far  := _proj[i]       # farther from camera → top of strip  (small sy)
 
 		# Clamp to screen; skip zero-height strips
-		var y_bot := clampi(int(near.sy), 0, int(SH) - 1)
-		var y_top := clampi(int(far.sy),  0, int(SH) - 1)
+		# cam_y_offset applies a uniform vertical shift (bump/camera bob)
+		var y_bot := clampi(int(near.sy + cam_y_offset), 0, int(SH) - 1)
+		var y_top := clampi(int(far.sy  + cam_y_offset), 0, int(SH) - 1)
 		if y_top >= y_bot:
 			continue
 

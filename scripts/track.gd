@@ -20,6 +20,7 @@ class Segment:
 	var hill:          float  # vertical delta (neg=down, pos=up)
 	var color_index:   int    # 0 or 1, alternates every RUMBLE_LENGTH segs
 	var is_checkpoint: bool
+	var is_bump:       bool   # triggers camera jolt when crossed at speed
 	var stage:         int    # 1=coastal  2=river valley  3=climb  4=descent
 	var scenery_l:     int
 	var scenery_r:     int
@@ -30,6 +31,7 @@ class Segment:
 		hill          = 0.0
 		color_index   = (i / Track.RUMBLE_LENGTH) % 2
 		is_checkpoint = false
+		is_bump       = false
 		stage         = s
 		scenery_l     = Track.SCENERY_NONE
 		scenery_r     = Track.SCENERY_NONE
@@ -236,6 +238,7 @@ func _build_track() -> void:
 
 	track_length = float(segments.size()) * SEGMENT_LENGTH
 	_assign_scenery()
+	_add_bumps()
 
 # ── Scenery placement ─────────────────────────────────────────────────────────
 func _assign_scenery() -> void:
@@ -260,6 +263,26 @@ func _assign_scenery() -> void:
 			4:  # Descent: oaks on right side (open valley view on left)
 				if alt:
 					seg.scenery_r = SCENERY_OAK
+
+# ── Bump placement ────────────────────────────────────────────────────────────
+# Marks segments as bumps based on stage character.
+# Stage 1 (coastal road): sparse – occasional potholes
+# Stage 2 (river valley): moderate – rough road alongside river
+# Stage 3 (mountain climb): frequent – loose gravel, rocky surface
+# Stage 4 (descent): occasional – repaved descent, a few rough patches
+func _add_bumps() -> void:
+	for seg: Segment in segments:
+		if seg.is_checkpoint:
+			continue
+		var interval: int
+		match seg.stage:
+			1: interval = 24
+			2: interval = 16
+			3: interval = 10
+			4: interval = 20
+			_: interval = 24
+		if seg.index % interval == 3:
+			seg.is_bump = true
 
 # ── Query ─────────────────────────────────────────────────────────────────────
 

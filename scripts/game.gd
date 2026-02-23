@@ -63,6 +63,11 @@ var _deer:        Array = []   # 0 or 1 entry: {z: float, x: float}
 var _deer_hit_t:  float = 0.0
 var _wall_hit_t:  float = 0.0
 
+# ── Road bump camera bob ───────────────────────────────────────────────────────
+var _bump_amp:   float = 0.0   # current oscillation amplitude (px)
+var _bump_phase: float = 0.0   # oscillation phase (radians)
+var _on_bump:    bool  = false  # was player on a bump last frame
+
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	_build_scene()
@@ -230,6 +235,7 @@ func _do_racing(dt: float) -> void:
 
 	_tick_deer(dt)
 	_tick_wall_hit(dt)
+	_tick_bump(dt)
 
 	var accel := Input.is_action_pressed("accelerate")
 	var brake := Input.is_action_pressed("brake")
@@ -300,6 +306,27 @@ func _on_wall_hit() -> void:
 	_wall_hit_t        = 1.8
 	_lbl_wall_hit.text = "THAT HURTS!"
 	AudioManager.play_sfx("hit")
+
+# ── Road bump camera bob ───────────────────────────────────────────────────────
+func _tick_bump(dt: float) -> void:
+	var seg        := _track.get_segment(_player.position_z)
+	var now_bump   := seg.is_bump
+
+	# Rising edge: player just crossed onto a bump segment
+	if now_bump and not _on_bump:
+		var speed_ratio := _player.speed / _player.max_speed
+		_bump_amp   = speed_ratio * 32.0   # up to 32 px at top speed
+		_bump_phase = 0.0
+	_on_bump = now_bump
+
+	# Advance oscillation and apply decay
+	if _bump_amp > 0.5:
+		_bump_phase                += 14.0 * dt        # ~2.2 Hz bounce
+		_bump_amp                  *= 1.0 - 5.0 * dt  # fades in ~0.3 s
+		_renderer.cam_y_offset      = sin(_bump_phase) * _bump_amp
+	else:
+		_bump_amp              = 0.0
+		_renderer.cam_y_offset = 0.0
 
 # ── Checkpoint ────────────────────────────────────────────────────────────────
 func _on_checkpoint_passed(_idx: int) -> void:
