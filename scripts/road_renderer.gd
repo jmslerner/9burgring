@@ -144,8 +144,8 @@ func _quad(x1: float, y1: int, w1: float,
 		   color: Color) -> void:
 	draw_colored_polygon(
 		PackedVector2Array([
-			Vector2(x1 - w1, y1), Vector2(x1 + w1, y1),
-			Vector2(x2 + w2, y2), Vector2(x2 - w2, y2)
+			Vector2(x1 - w1, float(y1)), Vector2(x1 + w1, float(y1)),
+			Vector2(x2 + w2, float(y2)), Vector2(x2 - w2, float(y2)),
 		]),
-		color
+		PackedColorArray([color, color, color, color])
 	)

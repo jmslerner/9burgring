@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cta50dhlj3p60"
+path="res://.godot/imported/Choose your driver.mp3-3ef8c1848bc312fd763e1dd50d2754f2.mp3str"
+
+[deps]
+
+source_file="res://audio/Choose your driver.mp3"
+dest_files=["res://.godot/imported/Choose your driver.mp3-3ef8c1848bc312fd763e1dd50d2754f2.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

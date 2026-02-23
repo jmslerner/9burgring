@@ -110,7 +110,6 @@ func _process(dt: float) -> void:
 	if _blink_t >= 0.5:
 		_blink_t    = 0.0
 		_blink_show = !_blink_show
-	# Track mouse hover
 	var mp := get_local_mouse_position()
 	_hover_index = -1
 	for i in range(CARS.size()):
@@ -130,8 +129,8 @@ func _draw() -> void:
 
 # ── Sky gradient ──────────────────────────────────────────────────────────────
 func _draw_sky() -> void:
-	_grad_rect(0.0, 0.0,            SW, HORIZON_Y * 0.58, C_SKY_DEEP, C_SKY_MID)
-	_grad_rect(0.0, HORIZON_Y * 0.58, SW, HORIZON_Y,       C_SKY_MID,  C_HORIZON)
+	_grad_rect(0.0, 0.0,              SW, HORIZON_Y * 0.58, C_SKY_DEEP, C_SKY_MID)
+	_grad_rect(0.0, HORIZON_Y * 0.58, SW, HORIZON_Y,        C_SKY_MID,  C_HORIZON)
 
 # ── Sun ───────────────────────────────────────────────────────────────────────
 func _draw_sun() -> void:
@@ -139,14 +138,12 @@ func _draw_sun() -> void:
 	var cy := SUN_CY
 	var r  := SUN_R + _sun_pulse * 4.0
 
-	# Glow rings
 	for ring in range(7, 0, -1):
 		var gr := r + ring * 13.0
 		var ga := maxf(0.0, 0.13 - ring * 0.016) * (0.65 + _sun_pulse * 0.35)
 		draw_circle(Vector2(cx, cy), gr,
 			Color(C_HORIZON.r, C_HORIZON.g, C_HORIZON.b, ga))
 
-	# Concentric colour gradient body
 	var steps := 24
 	for i in range(steps, 0, -1):
 		var t  := float(i) / float(steps)
@@ -160,7 +157,6 @@ func _draw_sun() -> void:
 			c = C_SUN_YEL
 		draw_circle(Vector2(cx, cy), cr, c)
 
-	# Horizontal scan lines
 	var scan_y := cy - r
 	while scan_y <= cy + r:
 		var half_w := sqrt(maxf(0.0, r * r - (scan_y - cy) * (scan_y - cy)))
@@ -195,12 +191,10 @@ func _draw_mountains() -> void:
 # ── Title ─────────────────────────────────────────────────────────────────────
 func _draw_title() -> void:
 	var font := ThemeDB.fallback_font
-	# Drop shadow
 	draw_string(font, Vector2(SW * 0.5 - 66.0, 23.0),
 		"9BURGRING",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 20,
 		Color(0.0, 0.0, 0.0, 0.55))
-	# Main neon-pink text
 	draw_string(font, Vector2(SW * 0.5 - 68.0, 22.0),
 		"9BURGRING",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 20, C_NEON_PINK)
@@ -210,8 +204,8 @@ func _card_rect(i: int) -> Rect2:
 	var col: int = i % 4
 	var row: int = i / 4
 	return Rect2(
-		GRID_LEFT + col * (CARD_W + CARD_GAP_X),
-		GRID_TOP  + row * (CARD_H + CARD_GAP_Y),
+		GRID_LEFT + float(col) * (CARD_W + CARD_GAP_X),
+		GRID_TOP  + float(row) * (CARD_H + CARD_GAP_Y),
 		CARD_W, CARD_H
 	)
 
@@ -227,7 +221,7 @@ func _draw_card(i: int) -> void:
 	var car: Dictionary = CARS[i]
 	var r: Rect2        = _card_rect(i)
 	var font            := ThemeDB.fallback_font
-	var body_c: Color   = car["body"] as Color
+	var body_c: Color   = car["body"]
 
 	# Background
 	draw_rect(r, Color(C_CARD_BG.r, C_CARD_BG.g, C_CARD_BG.b, C_CARD_BG.a * alpha))
@@ -248,19 +242,19 @@ func _draw_card(i: int) -> void:
 	draw_rect(Rect2(bx, by, 44.0, 13.0),
 		Color(body_c.r * 0.4, body_c.g * 0.4, body_c.b * 0.4, alpha * 0.85))
 	draw_string(font, Vector2(bx + 2.0, by + 11.0),
-		car["type"] as String,
+		str(car["type"]),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 8,
 		Color(1.0, 1.0, 1.0, alpha))
 
 	# Driver name — neon yellow
 	draw_string(font, Vector2(r.position.x + 6.0, r.position.y + 30.0),
-		(car["driver"] as String).to_upper(),
+		str(car["driver"]).to_upper(),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12,
 		Color(C_NEON_YEL.r, C_NEON_YEL.g, C_NEON_YEL.b, alpha))
 
 	# Car name — neon blue
 	draw_string(font, Vector2(r.position.x + 6.0, r.position.y + 44.0),
-		car["car"] as String,
+		str(car["car"]),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
 		Color(C_NEON_BLUE.r, C_NEON_BLUE.g, C_NEON_BLUE.b, alpha * 0.85))
 
@@ -290,14 +284,14 @@ func _draw_stat_bars(i: int, r: Rect2, alpha: float) -> void:
 	var bar_y0 := r.position.y + 102.0
 
 	for s in range(5):
-		var label: String = STAT_LABELS[s] as String
-		var key:   String = STAT_KEYS[s]   as String
-		var max_v: int    = STAT_MAXES[s]  as int
-		var val_i: int    = car[key]       as int
+		var label: String = str(STAT_LABELS[s])
+		var key:   String = str(STAT_KEYS[s])
+		var max_v: int    = int(STAT_MAXES[s])
+		var val_i: int    = int(car[key])
 		var fill:  float  = clampf(float(val_i) / float(max_v), 0.0, 1.0) * bt
 		var y             := bar_y0 + float(s) * row_h
 
-		# Stat label
+		# Label
 		draw_string(font, Vector2(bar_x, y + bar_h),
 			label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7,
 			Color(0.75, 0.75, 0.85, alpha * 0.75))
@@ -311,8 +305,8 @@ func _draw_stat_bars(i: int, r: Rect2, alpha: float) -> void:
 		# Gradient fill
 		if fill > 0.001:
 			var fw  := bar_w * fill
-			var c1: Color = _stat_c1[s] as Color
-			var c2: Color = _stat_c2[s] as Color
+			var c1: Color = _stat_c1[s]
+			var c2: Color = _stat_c2[s]
 			c1.a = alpha
 			c2.a = alpha
 			draw_colored_polygon(
@@ -331,7 +325,7 @@ func _draw_stat_bars(i: int, r: Rect2, alpha: float) -> void:
 					Color(0.0, 0.0, 0.0, alpha * 0.30))
 				nx += 6.0
 
-		# Numeric value to the right of the bar
+		# Numeric value to the right of bar
 		draw_string(font, Vector2(bx + bar_w + 3.0, y + bar_h),
 			str(val_i),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 7,
@@ -350,7 +344,7 @@ func _draw_soundtrack_bar() -> void:
 	draw_string(font, Vector2(GRID_LEFT, y + 14.0),
 		"SOUNDTRACK:", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C_NEON_BLUE)
 	for t in range(TRACKS.size()):
-		var track: Dictionary = TRACKS[t] as Dictionary
+		var track: Dictionary = TRACKS[t]
 		var tr := _soundtrack_rect(t)
 		draw_rect(tr, Color(0.0, 0.0, 0.0, 0.55))
 		var bc: Color
@@ -359,7 +353,7 @@ func _draw_soundtrack_bar() -> void:
 		else:
 			bc = Color(C_NEON_BLUE.r, C_NEON_BLUE.g, C_NEON_BLUE.b, 0.5)
 		draw_rect(tr, bc, false, 1.5)
-		var label: String = (track["artist"] as String) + " — " + (track["name"] as String)
+		var label: String = str(track["artist"]) + " — " + str(track["name"])
 		draw_string(font, Vector2(tr.position.x + 5.0, tr.position.y + 14.0),
 			label, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
 			Color(1.0, 1.0, 1.0, 0.9))
@@ -405,14 +399,14 @@ func _build_audio() -> void:
 
 # ── Pixel-art car texture ─────────────────────────────────────────────────────
 func _build_car_textures() -> void:
-	for car: Dictionary in CARS:
-		var body: Color   = car["body"]   as Color
-		var accent: Color = car["accent"] as Color
-		var is4d: bool    = (car["type"] as String) == "4-Door"
+	for i in range(CARS.size()):
+		var car: Dictionary = CARS[i]
+		var body: Color     = car["body"]
+		var accent: Color   = car["accent"]
+		var is4d: bool      = str(car["type"]) == "4-Door"
 		_car_textures.append(_make_car_texture(is4d, body, accent))
 
-# Draws a 60×16 pixel car sprite and returns it as an ImageTexture.
-# Scale up 3× in _draw_card for display (180×48 px).
+# Draws a 60×16 pixel car. Displayed at 3× scale (180×48 px) in each card.
 func _make_car_texture(is4d: bool, body: Color, accent: Color) -> ImageTexture:
 	var img   := Image.create(60, 16, false, Image.FORMAT_RGBA8)
 	var win   := Color("#00d4ff")
@@ -420,12 +414,12 @@ func _make_car_texture(is4d: bool, body: Color, accent: Color) -> ImageTexture:
 	var wheel := Color("#1a1a2e")
 	var hl    := Color("#ffe44d")
 
-	# ── Roof (rows 0-1) — narrow, centred, accent colour ─────────────────────
+	# Roof (rows 0-1)
 	for x in range(18, 42):
 		img.set_pixel(x, 0, accent)
 		img.set_pixel(x, 1, accent)
 
-	# ── Cabin shell (rows 2-4) ────────────────────────────────────────────────
+	# Cabin shell (rows 2-4)
 	for y in range(2, 5):
 		for x in range(8, 52):
 			img.set_pixel(x, y, body)
@@ -433,27 +427,27 @@ func _make_car_texture(is4d: bool, body: Color, accent: Color) -> ImageTexture:
 	# Windows
 	for y in range(2, 5):
 		for x in range(11, 22):
-			img.set_pixel(x, y, win)    # left window
+			img.set_pixel(x, y, win)    # left
 		for x in range(25, 36):
-			img.set_pixel(x, y, win)    # right window
+			img.set_pixel(x, y, win)    # right
 		if is4d:
 			for x in range(39, 50):
-				img.set_pixel(x, y, win)   # rear window (4-door)
+				img.set_pixel(x, y, win)   # rear (4-door)
 
-	# A-pillars, C-pillar (trim)
+	# Pillars (trim colour)
 	for y in range(2, 5):
-		for dx: int in [8, 9, 22, 23, 24, 50, 51]:
+		for dx in [8, 9, 22, 23, 24, 50, 51]:
 			img.set_pixel(dx, y, trim)
 		if is4d:
-			img.set_pixel(37, y, trim)   # B-pillar
+			img.set_pixel(37, y, trim)
 			img.set_pixel(38, y, trim)
 
-	# ── Body main (rows 5-9) ──────────────────────────────────────────────────
+	# Body main (rows 5-9)
 	for y in range(5, 10):
 		for x in range(4, 56):
 			img.set_pixel(x, y, body)
 
-	# Side vents (2-door) / door-split line (4-door)
+	# Side vents (2-door) or door split (4-door)
 	if not is4d:
 		for y in range(6, 9):
 			for x in range(4, 8):
@@ -472,11 +466,11 @@ func _make_car_texture(is4d: bool, body: Color, accent: Color) -> ImageTexture:
 		for x in range(56, 60):
 			img.set_pixel(x, y, hl)
 
-	# ── Bumper (row 10) ───────────────────────────────────────────────────────
+	# Bumper (row 10)
 	for x in range(2, 58):
 		img.set_pixel(x, 10, trim)
 
-	# ── Wheels (rows 11-14) ───────────────────────────────────────────────────
+	# Wheels (rows 11-14)
 	for y in range(11, 15):
 		for x in range(2, 13):
 			img.set_pixel(x, y, wheel)
@@ -484,20 +478,19 @@ func _make_car_texture(is4d: bool, body: Color, accent: Color) -> ImageTexture:
 			img.set_pixel(x, y, wheel)
 		for x in range(13, 47):
 			img.set_pixel(x, y, body)
-	# Wheel shine highlight (top of each wheel)
 	var shine := Color(0.25, 0.25, 0.40)
 	for x in range(4, 11):
 		img.set_pixel(x, 11, shine)
 	for x in range(49, 56):
 		img.set_pixel(x, 11, shine)
 
-	# ── Ground shadow (row 15) ────────────────────────────────────────────────
+	# Ground shadow (row 15)
 	for x in range(5, 55):
 		img.set_pixel(x, 15, Color(0.0, 0.0, 0.0, 0.35))
 
 	return ImageTexture.create_from_image(img)
 
-# ── Card stagger-in animation ─────────────────────────────────────────────────
+# ── Card stagger-in animations ────────────────────────────────────────────────
 func _animate_cards_in() -> void:
 	for i in range(CARS.size()):
 		var delay := float(i) * 0.08
@@ -547,15 +540,15 @@ func _handle_click() -> void:
 
 func _select_track(t: int) -> void:
 	_track_index = t
-	var track: Dictionary = TRACKS[t] as Dictionary
-	var sfx = _try_load(track["file"] as String)
+	var track: Dictionary = TRACKS[t]
+	var sfx = _try_load(str(track["file"]))
 	if sfx != null:
 		_music.stream = sfx
 		_music.play()
 
 func _confirm_car() -> void:
 	_confirming = true
-	GameState.selected_car = CARS[_car_index] as Dictionary
+	GameState.selected_car = CARS[_car_index]
 
 	var sfx = _try_load("res://audio/Good_choice.mp3")
 	if sfx != null:
@@ -568,7 +561,7 @@ func _confirm_car() -> void:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-# Horizontal gradient quad
+# Horizontal gradient quad (top_c → bot_c)
 func _grad_rect(x: float, y_top: float, w: float, y_bot: float,
 				top_c: Color, bot_c: Color) -> void:
 	draw_colored_polygon(

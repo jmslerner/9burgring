@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://c8keruxwgsstt"
+path="res://.godot/imported/ZISO - White Vacancy.mp3-d34276dea28383cfd2a96d692570a2e4.mp3str"
+
+[deps]
+
+source_file="res://audio/ZISO - White Vacancy.mp3"
+dest_files=["res://.godot/imported/ZISO - White Vacancy.mp3-d34276dea28383cfd2a96d692570a2e4.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
