@@ -10,21 +10,21 @@ const CAM_HEIGHT   := 1500.0  # camera height above road surface
 const ROAD_WIDTH   := 2000.0  # half-width of road in world units
 
 # ── Road surface palette (shared across stages) ───────────────────────────────
-const C_ROAD_D  := Color("#666666")
-const C_ROAD_L  := Color("#707070")
-const C_LANE    := Color("#FFFFFF")
-const C_RMB_A   := Color("#FF2D95")   # neon pink rumble
-const C_RMB_B   := Color("#FFFFFF")   # white rumble
-const C_CHKPT   := Color(0.95, 0.85, 0.10)
+var C_ROAD_D  = Color("#666666")
+var C_ROAD_L  = Color("#707070")
+var C_LANE    = Color("#FFFFFF")
+var C_RMB_A   = Color("#FF2D95")   # neon pink rumble
+var C_RMB_B   = Color("#FFFFFF")   # white rumble
+var C_CHKPT   = Color(0.95, 0.85, 0.10)
 
 # ── Per-stage sky colors [top, bottom] ────────────────────────────────────────
-const SKY_TOP := [
+var SKY_TOP = [
 	Color("#5BA3D9"),   # Stage 1 — coastal light blue
 	Color("#4488CC"),   # Stage 2 — afternoon blue
 	Color("#2A1A4A"),   # Stage 3 — dusk purple
 	Color("#CC4400"),   # Stage 4 — sunset orange
 ]
-const SKY_BOT := [
+var SKY_BOT = [
 	Color("#D8EEF8"),   # Stage 1 — coastal haze white
 	Color("#DDAA44"),   # Stage 2 — afternoon gold
 	Color("#1A2A4A"),   # Stage 3 — dark blue dusk
@@ -32,13 +32,13 @@ const SKY_BOT := [
 ]
 
 # ── Per-stage mountain silhouette colors ──────────────────────────────────────
-const MTN_DARK := [
+var MTN_DARK = [
 	Color("#2A4A2A"),   # Stage 1 — redwood dark
 	Color("#304A2A"),   # Stage 2 — forest
 	Color("#1A1A2A"),   # Stage 3 — dark ridge
 	Color("#4A2A10"),   # Stage 4 — warm ridge
 ]
-const MTN_LIGHT := [
+var MTN_LIGHT = [
 	Color("#3A603A"),   # Stage 1
 	Color("#3A5A30"),   # Stage 2
 	Color("#28283A"),   # Stage 3
@@ -46,13 +46,13 @@ const MTN_LIGHT := [
 ]
 
 # ── Per-stage grass colors [dark, light] ──────────────────────────────────────
-const GRASS_D := [
+var GRASS_D = [
 	Color("#2D5A27"),   # Stage 1 — redwood forest
 	Color("#2D5A27"),   # Stage 2 — redwood / river
 	Color("#3A6B35"),   # Stage 3 — mountain green
 	Color("#8B7D3C"),   # Stage 4 — vineyard gold
 ]
-const GRASS_L := [
+var GRASS_L = [
 	Color("#234D1F"),   # Stage 1
 	Color("#234D1F"),   # Stage 2
 	Color("#2D5A27"),   # Stage 3
@@ -69,10 +69,14 @@ var _current_stage: int = 1
 
 # ── Internal projected-segment cache ─────────────────────────────────────────
 class _PSeg:
-	var sx: float   # screen x of road centre
-	var sy: float   # screen y (large = bottom of screen, small = horizon)
-	var sw: float   # half-width of road on screen
-	var seg: Track.Segment
+	var sx:            float
+	var sy:            float
+	var sw:            float
+	var color_index:   int
+	var is_checkpoint: bool
+	var stage:         int
+	var scenery_l:     int
+	var scenery_r:     int
 
 var _proj: Array = []  # Array of _PSeg
 
@@ -128,23 +132,27 @@ func _project_segments() -> void:
 		var sy := SH * 0.5 + scale * (CAM_HEIGHT - acc_y)
 		var sw := scale * ROAD_WIDTH
 
-		var p     := _PSeg.new()
-		p.sx  = sx
-		p.sy  = sy
-		p.sw  = sw
-		p.seg = seg
+		var p             := _PSeg.new()
+		p.sx            = sx
+		p.sy            = sy
+		p.sw            = sw
+		p.color_index   = seg.color_index
+		p.is_checkpoint = seg.is_checkpoint
+		p.stage         = seg.stage
+		p.scenery_l     = seg.scenery_l
+		p.scenery_r     = seg.scenery_r
 		_proj.append(p)
 
 	# Derive current stage from the nearest visible segment
 	if not _proj.is_empty():
-		_current_stage = _proj[0].seg.stage
+		_current_stage = (_proj[0] as _PSeg).stage
 
 # ── Draw road from back to front ──────────────────────────────────────────────
 func _draw_road_strips() -> void:
 	# Draw back-to-front (far → near). Near strips naturally overwrite far ones.
 	for i in range(_proj.size() - 1, 0, -1):
-		var near := _proj[i - 1]   # closer to camera  → bottom of strip (large sy)
-		var far  := _proj[i]       # farther from camera → top of strip  (small sy)
+		var near: _PSeg = _proj[i - 1]   # closer to camera  → bottom of strip (large sy)
+		var far:  _PSeg = _proj[i]       # farther from camera → top of strip  (small sy)
 
 		# Clamp to screen; skip zero-height strips
 		var y_bot := clampi(int(near.sy), 0, int(SH) - 1)
@@ -152,8 +160,8 @@ func _draw_road_strips() -> void:
 		if y_top >= y_bot:
 			continue
 
-		var even := near.seg.color_index == 0
-		var si   := near.seg.stage - 1   # 0-based stage index for palette
+		var even := near.color_index == 0
+		var si   := near.stage - 1   # 0-based stage index for palette
 
 		# ── Grass ─────────────────────────────────────────────────────────
 		draw_rect(Rect2(0, y_top, SW, y_bot - y_top),
@@ -170,7 +178,7 @@ func _draw_road_strips() -> void:
 			  C_ROAD_D if even else C_ROAD_L)
 
 		# ── Checkpoint flash ───────────────────────────────────────────────
-		if near.seg.is_checkpoint:
+		if near.is_checkpoint:
 			_quad(far.sx,  y_top, far.sw  * 0.55,
 				  near.sx, y_bot, near.sw * 0.55, C_CHKPT)
 
@@ -181,10 +189,10 @@ func _draw_road_strips() -> void:
 
 		# ── Roadside scenery ───────────────────────────────────────────────
 		var sc := near.sw / ROAD_WIDTH
-		if near.seg.scenery_r != 0:
-			_draw_scenery(near.seg.scenery_r, near.sx + near.sw * 1.22, y_bot, sc)
-		if near.seg.scenery_l != 0:
-			_draw_scenery(near.seg.scenery_l, near.sx - near.sw * 1.22, y_bot, sc)
+		if near.scenery_r != 0:
+			_draw_scenery(near.scenery_r, near.sx + near.sw * 1.22, y_bot, sc)
+		if near.scenery_l != 0:
+			_draw_scenery(near.scenery_l, near.sx - near.sw * 1.22, y_bot, sc)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -214,7 +222,7 @@ func _draw_pine(x: float, y_base: int, sc: float) -> void:
 			Vector2(x + hw, float(y_base)),
 			Vector2(x - hw, float(y_base)),
 		]),
-		PackedColorArray([Color("#163818"), Color("#163818"), Color("#163818")])
+		Color("#163818")
 	)
 
 func _draw_guardrail(x: float, y_base: int, sc: float) -> void:
@@ -242,5 +250,5 @@ func _quad(x1: float, y1: int, w1: float,
 			Vector2(x1 - w1, float(y1)), Vector2(x1 + w1, float(y1)),
 			Vector2(x2 + w2, float(y2)), Vector2(x2 - w2, float(y2)),
 		]),
-		PackedColorArray([color, color, color, color])
+		color
 	)

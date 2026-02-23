@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1771814733
+::res://::1771815257
 outrun_reference.md::TextFile::-1::1771806136::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1771801067::0::1::::<><><>0<>0<><>::
 track_9burgring_reference.md::TextFile::-1::1771809389::0::1::::<><><>0<>0<><>::
@@ -8,7 +8,7 @@ track_9burgring_reference.md::TextFile::-1::1771809389::0::1::::<><><>0<>0<><>::
 ::res://assets/audio/music/::1771802887
 ::res://assets/audio/sfx/::1771802887
 ::res://assets/sprites/::1771802887
-::res://audio/::1771812887
+::res://audio/::1771814734
 2050 - Turbo Power.mp3::AudioStreamMP3::7259036096480060736::1771805875::1771808677::1::::<><><>0<>0<>1b97c18508d8d2d65fd0aeed749240f2<>res://.godot/imported/2050 - Turbo Power.mp3-3127bc92f68bd18807e932de767026a1.mp3str::
 Choose your driver.mp3::AudioStreamMP3::6108295720036050691::1771805408::1771808677::1::::<><><>0<>0<>48786e8f9c9d144fe4b07d3cb2209424<>res://.godot/imported/Choose your driver.mp3-3ef8c1848bc312fd763e1dd50d2754f2.mp3str::
 engine_accel.mp3::AudioStreamMP3::8196418706566431403::1771812887::1771814734::1::::<><><>0<>0<>48b79c631d57c0db16b1630da3e5d0b7<>res://.godot/imported/engine_accel.mp3-30f2978d07c9f24a8cd708277aca1c7a.mp3str::
@@ -18,13 +18,13 @@ ZISO - White Vacancy.mp3::AudioStreamMP3::7109991298455148369::1771805907::17718
 ::res://scenes/::1771803709
 car_select.tscn::PackedScene::190740087695980759::1771803709::0::1::::<><><>0<>0<><>::uid://df4xjeqr5mdxj::::res://scripts/car_select.gd
 game.tscn::PackedScene::-1::1771803169::0::1::::<><><>0<>0<><>::res://scripts/game.gd
-::res://scripts/::1771814170
+::res://scripts/::1771815205
 audio_manager.gd::GDScript::169356029169182509::1771812931::0::1::::<>Node<><>0<>0<><>::
-car_select.gd::GDScript::7571486022739210755::1771808950::0::1::::<>Node2D<><>0<>0<><>::
-game.gd::GDScript::7906898594780703953::1771813220::0::1::::<>Node2D<><>0<>0<><>::
+car_select.gd::GDScript::7571486022739210755::1771814956::0::1::::<>Node2D<><>0<>0<><>::
+game.gd::GDScript::7906898594780703953::1771814770::0::1::::<>Node2D<><>0<>0<><>::
 game_state.gd::GDScript::8489164890799706817::1771803124::0::1::::<>Node<><>0<>0<><>::
 player.gd::GDScript::4939361414521713040::1771811883::0::1::::Player<>Node2D<><>0<>0<><>::
-road_renderer.gd::GDScript::398946543806444277::1771814170::0::1::::RoadRenderer<>Node2D<><>0<>0<><>::
+road_renderer.gd::GDScript::398946543806444277::1771815205::0::1::::RoadRenderer<>Node2D<><>0<>0<><>::
 track.gd::GDScript::3985205478821008273::1771814146::0::1::::Track<>RefCounted<><>0<>0<><>::
 ::res://shaders/::1771808677
 grid_floor.gdshader::Shader::6011489739296958287::1771806885::0::1::::<><><>0<>0<><>::

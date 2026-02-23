@@ -2,15 +2,15 @@
 extends Node2D
 
 # ── Reference palette ─────────────────────────────────────────────────────────
-const C_SKY_DEEP  := Color(0.102, 0.039, 0.180)   # #1a0a2e  deep space
-const C_SKY_MID   := Color(0.239, 0.067, 0.333)   # #3d1155  mid purple
-const C_HORIZON   := Color(1.000, 0.176, 0.584)   # #ff2d95  neon pink
-const C_SUN_YEL   := Color(1.000, 0.894, 0.302)   # #ffe44d  bright yellow
-const C_SUN_ORG   := Color(1.000, 0.420, 0.169)   # #ff6b2b  orange
-const C_NEON_BLUE := Color(0.000, 0.831, 1.000)   # #00d4ff  cyan
-const C_NEON_PINK := Color(1.000, 0.176, 0.584)   # #ff2d95
-const C_NEON_YEL  := Color(1.000, 0.894, 0.302)   # #ffe44d
-const C_CARD_BG   := Color(0.000, 0.000, 0.000, 0.72)
+var C_SKY_DEEP  = Color(0.102, 0.039, 0.180)   # #1a0a2e  deep space
+var C_SKY_MID   = Color(0.239, 0.067, 0.333)   # #3d1155  mid purple
+var C_HORIZON   = Color(1.000, 0.176, 0.584)   # #ff2d95  neon pink
+var C_SUN_YEL   = Color(1.000, 0.894, 0.302)   # #ffe44d  bright yellow
+var C_SUN_ORG   = Color(1.000, 0.420, 0.169)   # #ff6b2b  orange
+var C_NEON_BLUE = Color(0.000, 0.831, 1.000)   # #00d4ff  cyan
+var C_NEON_PINK = Color(1.000, 0.176, 0.584)   # #ff2d95
+var C_NEON_YEL  = Color(1.000, 0.894, 0.302)   # #ffe44d
+var C_CARD_BG   = Color(0.000, 0.000, 0.000, 0.72)
 
 # ── Layout ────────────────────────────────────────────────────────────────────
 const SW        := 1024.0
@@ -34,7 +34,7 @@ const STAT_KEYS   = ["hp", "handling", "accel", "braking", "top_speed"]
 const STAT_MAXES  = [550,  5,          5,       5,         200        ]
 
 # ── Car roster (all 8) ────────────────────────────────────────────────────────
-const CARS = [
+var CARS = [
 	{"driver":"Myles",   "car":"BMW Turbo",     "type":"4-Door",
 	 "hp":400,"handling":3,"accel":4,"braking":3,"top_speed":150,
 	 "body":Color("#e63946"),"accent":Color("#c1121f")},
@@ -309,7 +309,7 @@ func _draw_stat_bars(i: int, r: Rect2, alpha: float) -> void:
 			var c2: Color = _stat_c2[s]
 			c1.a = alpha
 			c2.a = alpha
-			draw_colored_polygon(
+			draw_polygon(
 				PackedVector2Array([
 					Vector2(bx,      y),
 					Vector2(bx + fw, y),
@@ -564,7 +564,7 @@ func _confirm_car() -> void:
 # Horizontal gradient quad (top_c → bot_c)
 func _grad_rect(x: float, y_top: float, w: float, y_bot: float,
 				top_c: Color, bot_c: Color) -> void:
-	draw_colored_polygon(
+	draw_polygon(
 		PackedVector2Array([
 			Vector2(x,     y_top), Vector2(x + w, y_top),
 			Vector2(x + w, y_bot), Vector2(x,     y_bot),
@@ -574,10 +574,7 @@ func _grad_rect(x: float, y_top: float, w: float, y_bot: float,
 
 # Solid-colour filled polygon
 func _filled_poly(pts: PackedVector2Array, color: Color) -> void:
-	var colors := PackedColorArray()
-	colors.resize(pts.size())
-	colors.fill(color)
-	draw_colored_polygon(pts, colors)
+	draw_colored_polygon(pts, color)
 
 # Safe resource loader — returns null if path doesn't exist
 func _try_load(path: String):
