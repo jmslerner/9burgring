@@ -16,6 +16,7 @@ var off_road:   bool  = false  # true when car is outside road bounds
 
 # ── Signals ───────────────────────────────────────────────────────────────────
 signal checkpoint_passed(index: int)
+signal track_finished
 
 # ── References (set by game.gd) ───────────────────────────────────────────────
 var track: Track
@@ -78,11 +79,10 @@ func _handle_input(dt: float) -> void:
 
 func _update_position(dt: float) -> void:
 	position_z += speed * dt
-	# Wrap around track
-	if track != null:
-		position_z = fmod(position_z, track.track_length)
-		if position_z < 0.0:
-			position_z += track.track_length
+	if track != null and position_z >= track.track_length:
+		position_z = track.track_length
+		speed = 0.0
+		track_finished.emit()
 
 func _check_checkpoints() -> void:
 	if track == null:

@@ -55,6 +55,7 @@ func _build_scene() -> void:
 		_player.apply_car_stats(GameState.selected_car)
 	add_child(_player)
 	_player.checkpoint_passed.connect(_on_checkpoint_passed)
+	_player.track_finished.connect(_trigger_finish)
 
 	# Draw player car (simple coloured rectangle placeholder)
 	var car_rect      := ColorRect.new()
@@ -169,12 +170,7 @@ func _on_checkpoint_passed(idx: int) -> void:
 	_time_left       += CHECKPOINT_BONUS
 	AudioManager.play_sfx("checkpoint")
 
-	# All checkpoints cleared → finish
-	if _checkpoints_hit >= _total_checkpoints:
-		_trigger_finish()
-		return
-
-	# Advance stage label
+	# Advance stage label (checkpoint N puts you in stage N+1)
 	var stage := _checkpoints_hit + 1
 	_lbl_stage.text = "STAGE %d  %s" % [stage, STAGE_NAMES[stage - 1]]
 	_lbl_checkpoint.text = "CHECKPOINT! +%ds" % int(CHECKPOINT_BONUS)
