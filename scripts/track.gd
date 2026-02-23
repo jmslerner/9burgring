@@ -22,7 +22,7 @@ class Segment:
 		is_checkpoint = false
 
 # ── Track ─────────────────────────────────────────────────────────────────────
-var segments: Array[Segment] = []
+var segments: Array = []  # Array of Segment
 var track_length: float = 0.0
 
 func _init() -> void:

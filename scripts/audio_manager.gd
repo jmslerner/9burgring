@@ -1,60 +1,38 @@
 ## AudioManager — autoloaded singleton
-## Handles music tracks, sound effects, and engine audio.
-## Add OGG/WAV files under:
-##   res://assets/audio/music/   (e.g. stage1.ogg, select.ogg)
-##   res://assets/audio/sfx/     (e.g. checkpoint.wav, offroad.wav)
+## Drop audio files into:
+##   res://assets/audio/music/  (select.ogg, stage1.ogg, finish.ogg)
+##   res://assets/audio/sfx/    (engine.ogg, checkpoint.wav, etc.)
 extends Node
 
-# ── Audio bus indices ─────────────────────────────────────────────────────────
-const BUS_MASTER := "Master"
-
-# ── Players ───────────────────────────────────────────────────────────────────
 var _music_player:  AudioStreamPlayer
 var _sfx_player:    AudioStreamPlayer
 var _engine_player: AudioStreamPlayer
 
-# ── Volume settings ───────────────────────────────────────────────────────────
-var music_volume: float = 0.8:
-	set(v):
-		music_volume = clamp(v, 0.0, 1.0)
-		if _music_player:
-			_music_player.volume_db = linear_to_db(music_volume)
-var sfx_volume: float = 1.0:
-	set(v):
-		sfx_volume = clamp(v, 0.0, 1.0)
+var music_volume: float = 0.8
+var sfx_volume:   float = 1.0
 
-# ── State ─────────────────────────────────────────────────────────────────────
 var _current_music: String = ""
-var _engine_base_pitch := 0.8
 
-# ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	_music_player  = _make_player(false)
-	_sfx_player    = _make_player(false)
-	_engine_player = _make_player(true)   # loops continuously
-
-func _make_player(loop: bool) -> AudioStreamPlayer:
-	var p := AudioStreamPlayer.new()
-	add_child(p)
-	return p
+	_music_player  = AudioStreamPlayer.new()
+	_sfx_player    = AudioStreamPlayer.new()
+	_engine_player = AudioStreamPlayer.new()
+	add_child(_music_player)
+	add_child(_sfx_player)
+	add_child(_engine_player)
 
 # ── Music ─────────────────────────────────────────────────────────────────────
 
-## Play a music file by name (without extension).
-## Looks for .ogg first, then .wav.
-func play_music(name: String) -> void:
-	if name == _current_music:
+func play_music(track_name: String) -> void:
+	if track_name == _current_music:
 		return
-	_current_music = name
-	var stream := _load_audio("res://assets/audio/music/" + name)
+	_current_music = track_name
+	var stream = _load_audio("res://assets/audio/music/" + track_name)
 	if stream == null:
-		push_warning("AudioManager: music '%s' not found" % name)
+		push_warning("AudioManager: music '%s' not found" % track_name)
 		return
-	if stream is AudioStreamOggVorbis:
-		stream.loop = true
-	elif stream is AudioStreamWAV:
-		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	_music_player.stream = stream
+	_set_loop(stream, true)
+	_music_player.stream   = stream
 	_music_player.volume_db = linear_to_db(music_volume)
 	_music_player.play()
 
@@ -64,39 +42,44 @@ func stop_music() -> void:
 
 # ── SFX ───────────────────────────────────────────────────────────────────────
 
-## One-shot sound effect by name (without extension).
-func play_sfx(name: String) -> void:
-	var stream := _load_audio("res://assets/audio/sfx/" + name)
+func play_sfx(sfx_name: String) -> void:
+	var stream = _load_audio("res://assets/audio/sfx/" + sfx_name)
 	if stream == null:
 		return
-	_sfx_player.stream = stream
+	_sfx_player.stream    = stream
 	_sfx_player.volume_db = linear_to_db(sfx_volume)
 	_sfx_player.play()
 
 # ── Engine sound ──────────────────────────────────────────────────────────────
 
-## Call every frame with normalised speed (0.0 – 1.0).
 func update_engine(speed_norm: float) -> void:
 	if not _engine_player.playing:
-		var stream := _load_audio("res://assets/audio/sfx/engine")
+		var stream = _load_audio("res://assets/audio/sfx/engine")
 		if stream != null:
-			if stream is AudioStreamOggVorbis:
-				stream.loop = true
-			elif stream is AudioStreamWAV:
-				stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			_set_loop(stream, true)
 			_engine_player.stream = stream
 			_engine_player.play()
-	_engine_player.pitch_scale = lerp(_engine_base_pitch, 2.0, speed_norm)
+	_engine_player.pitch_scale = lerp(0.8, 2.0, speed_norm)
 	_engine_player.volume_db   = linear_to_db(sfx_volume * 0.7)
 
 func stop_engine() -> void:
 	_engine_player.stop()
 
-# ── Internal loader ───────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-func _load_audio(base_path: String) -> AudioStream:
-	for ext in [".ogg", ".wav", ".mp3"]:
-		var path := base_path + ext
+# Enable looping on any stream type without triggering static-type errors.
+func _set_loop(stream, loop: bool) -> void:
+	if stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = loop
+	elif stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = (
+			AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
+		)
+
+# Returns an untyped Variant so callers can access subclass properties freely.
+func _load_audio(base_path: String):
+	for ext: String in [".ogg", ".wav", ".mp3"]:
+		var path: String = base_path + ext
 		if ResourceLoader.exists(path):
-			return load(path) as AudioStream
+			return load(path)
 	return null

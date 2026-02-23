@@ -161,7 +161,7 @@ func _input(event: InputEvent) -> void:
 		_start_game()
 
 func _refresh() -> void:
-	var car := CARS[_index]
+	var car: Dictionary = CARS[_index]
 	_car_preview.color     = car["color"]
 	_name_label.text       = car["name"]
 	_desc_label.text       = car["description"]

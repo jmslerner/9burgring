@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OUTRUN - Select Your Ride</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  :root {
+    --neon-pink: #ff2d95;
+    --neon-blue: #00d4ff;
+    --neon-purple: #b537f2;
+    --neon-orange: #ff6b2b;
+    --neon-yellow: #ffe44d;
+    --sunset-top: #1a0a2e;
+    --sunset-mid: #3d1155;
+    --sunset-low: #ff2d95;
+    --road-dark: #1a1a2e;
+    --grid-line: rgba(0, 212, 255, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--sunset-top);
+    font-family: 'Press Start 2P', monospace;
+    color: white;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Background with sunset gradient and grid */
+  .bg-layer {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .sun {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffe44d 0%, #ff6b2b 40%, #ff2d95 100%);
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 80px rgba(255, 107, 43, 0.6), 0 0 200px rgba(255, 45, 149, 0.3);
+    animation: sunPulse 4s ease-in-out infinite;
+  }
+
+  .sun::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 12px,
+      rgba(26, 10, 46, 0.7) 12px,
+      rgba(26, 10, 46, 0.7) 16px
+    );
+  }
+
+  @keyframes sunPulse {
+    0%, 100% { box-shadow: 0 0 80px rgba(255,107,43,0.6), 0 0 200px rgba(255,45,149,0.3); }
+    50% { box-shadow: 0 0 120px rgba(255,107,43,0.8), 0 0 300px rgba(255,45,149,0.5); }
+  }
+
+  .mountains {
+    position: absolute;
+    bottom: 40%;
+    left: 0; right: 0;
+    height: 200px;
+    background:
+      linear-gradient(135deg, transparent 33%, #2d1b4e 33%, #2d1b4e 40%, transparent 40%),
+      linear-gradient(225deg, transparent 33%, #2d1b4e 33%, #2d1b4e 40%, transparent 40%),
+      linear-gradient(155deg, transparent 38%, #1f1040 38%, #1f1040 46%, transparent 46%),
+      linear-gradient(205deg, transparent 38%, #1f1040 38%, #1f1040 46%, transparent 46%);
+    background-size: 300px 200px, 300px 200px, 400px 200px, 400px 200px;
+    background-position: 0 100%, 0 100%, -50px 100%, -50px 100%;
+    background-repeat: repeat-x;
+  }
+
+  .grid-floor {
+    position: absolute;
+    bottom: 0;
+    left: -50%;
+    right: -50%;
+    height: 40%;
+    background:
+      linear-gradient(180deg, #3d1155 0%, #1a0a2e 100%);
+    transform: perspective(500px) rotateX(60deg);
+    transform-origin: center top;
+    background-image:
+      repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 80px),
+      repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 80px);
+    animation: gridScroll 2s linear infinite;
+  }
+
+  @keyframes gridScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 80px; }
+  }
+
+  /* Main content */
+  .content {
+    position: relative;
+    z-index: 10;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Title */
+  .title-section {
+    text-align: center;
+    padding: 30px 0 10px;
+  }
+
+  .title-main {
+    font-size: clamp(28px, 5vw, 56px);
+    background: linear-gradient(180deg, #ffe44d 0%, #ff6b2b 50%, #ff2d95 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(255, 45, 149, 0.5));
+    letter-spacing: 8px;
+    animation: titleGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 45, 149, 0.5)); }
+    50% { filter: drop-shadow(0 0 40px rgba(255, 45, 149, 0.8)); }
+  }
+
+  .title-sub {
+    font-size: clamp(8px, 1.5vw, 14px);
+    color: var(--neon-blue);
+    letter-spacing: 6px;
+    margin-top: 10px;
+    text-shadow: 0 0 10px var(--neon-blue);
+  }
+
+  .blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Car grid */
+  .car-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 30px 0 60px;
+  }
+
+  /* Car card */
+  .car-card {
+    background: linear-gradient(135deg, rgba(26, 10, 46, 0.9), rgba(61, 17, 85, 0.7));
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: cardAppear 0.6s ease-out backwards;
+    image-rendering: pixelated;
+  }
+
+  .car-card:nth-child(1) { animation-delay: 0.1s; }
+  .car-card:nth-child(2) { animation-delay: 0.2s; }
+  .car-card:nth-child(3) { animation-delay: 0.3s; }
+  .car-card:nth-child(4) { animation-delay: 0.4s; }
+  .car-card:nth-child(5) { animation-delay: 0.5s; }
+  .car-card:nth-child(6) { animation-delay: 0.6s; }
+  .car-card:nth-child(7) { animation-delay: 0.7s; }
+  .car-card:nth-child(8) { animation-delay: 0.8s; }
+
+  @keyframes cardAppear {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .car-card:hover {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 30px rgba(255, 45, 149, 0.4), inset 0 0 30px rgba(255, 45, 149, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .car-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 45, 149, 0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .car-card:hover::before {
+    left: 100%;
+  }
+
+  /* Door type badge */
+  .door-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--neon-purple);
+    color: white;
+    font-size: 7px;
+    padding: 4px 8px;
+    border-radius: 2px;
+    z-index: 5;
+    text-shadow: 0 0 6px rgba(181, 55, 242, 0.8);
+    box-shadow: 0 0 10px rgba(181, 55, 242, 0.4);
+  }
+
+  /* Driver name */
+  .driver-name {
+    font-size: clamp(10px, 1.5vw, 14px);
+    color: var(--neon-yellow);
+    text-shadow: 0 0 10px rgba(255, 228, 77, 0.6);
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+
+  .car-name {
+    font-size: clamp(7px, 1vw, 9px);
+    color: var(--neon-blue);
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* Pixel art car canvas */
+  .pixel-car-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+    min-height: 120px;
+    position: relative;
+  }
+
+  .pixel-car-container canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    width: 240px;
+    height: 100px;
+    filter: drop-shadow(0 4px 16px rgba(255, 45, 149, 0.3));
+  }
+
+  /* Road under car */
+  .road-strip {
+    width: 80%;
+    height: 3px;
+    margin: 0 auto 12px;
+    background: repeating-linear-gradient(90deg, #555 0px, #555 12px, transparent 12px, transparent 24px);
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    opacity: 0.6;
+  }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stat-label {
+    font-size: 6px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .stat-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .stat-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.3) 3px,
+      rgba(0,0,0,0.3) 4px
+    );
+  }
+
+  .stat-bar-fill.hp { background: linear-gradient(90deg, #ff2d95, #ff6b2b); }
+  .stat-bar-fill.handling { background: linear-gradient(90deg, #00d4ff, #b537f2); }
+  .stat-bar-fill.accel { background: linear-gradient(90deg, #ffe44d, #ff6b2b); }
+  .stat-bar-fill.braking { background: linear-gradient(90deg, #b537f2, #ff2d95); }
+  .stat-bar-fill.topspeed { background: linear-gradient(90deg, #00d4ff, #ffe44d); }
+
+  .stat-value {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 5px;
+    color: white;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    z-index: 2;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 8px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px var(--neon-blue);
+    letter-spacing: 3px;
+    opacity: 0.7;
+  }
+
+  /* Selected state */
+  .car-card.selected {
+    border-color: var(--neon-yellow);
+    box-shadow: 0 0 40px rgba(255, 228, 77, 0.5), inset 0 0 40px rgba(255, 228, 77, 0.1);
+  }
+
+  .car-card.selected .driver-name::after {
+    content: ' ◄';
+    animation: blink 0.5s step-end infinite;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .car-grid { grid-template-columns: 1fr; gap: 16px; }
+    .sun { width: 180px; height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <div class="sun"></div>
+  <div class="mountains"></div>
+  <div class="grid-floor"></div>
+</div>
+
+<div class="content">
+  <div class="title-section">
+    <div class="title-main">OUTRUN</div>
+    <div class="title-sub">—— SELECT YOUR RIDE ——</div>
+    <div style="margin-top:14px; font-size: 8px; color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink);" class="blink">▼ CLICK A CAR TO SELECT ▼</div>
+  </div>
+
+  <div class="car-grid" id="carGrid"></div>
+
+  <div class="footer">© 1986 OUTRUN RACING · INSERT COIN TO CONTINUE</div>
+</div>
+
+<script>
+const cars = [
+  { driver: "MYLES", car: "BMW TURBO", doors: 4, hp: 400, handling: 3, accel: 4, braking: 3, topSpeed: 150,
+    colors: { body: '#e63946', accent: '#c1121f', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#ffe44d' }},
+  { driver: "JACK", car: "FORD ST", doors: 4, hp: 350, handling: 3, accel: 3, braking: 3, topSpeed: 135,
+    colors: { body: '#2196f3', accent: '#1565c0', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#ffe44d' }},
+  { driver: "CAMERON", car: "BMW V8", doors: 2, hp: 400, handling: 2, accel: 4, braking: 4, topSpeed: 160,
+    colors: { body: '#222', accent: '#111', window: '#00d4ff', trim: '#444', wheel: '#1a1a2e', light: '#ff2d95' }},
+  { driver: "ARI", car: "PORSCHE GT3", doors: 2, hp: 450, handling: 5, accel: 4, braking: 5, topSpeed: 185,
+    colors: { body: '#ffe44d', accent: '#f4a700', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#ffe44d' }},
+  { driver: "HRAG", car: "AUDI R8", doors: 2, hp: 450, handling: 4, accel: 4, braking: 4, topSpeed: 175,
+    colors: { body: '#b537f2', accent: '#8a2be2', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#00d4ff' }},
+  { driver: "ETHAN", car: "PORSCHE SPYDER", doors: 2, hp: 420, handling: 4, accel: 4, braking: 5, topSpeed: 165,
+    colors: { body: '#ff6b2b', accent: '#d4500a', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#ffe44d' }},
+  { driver: "JAMES", car: "SHELBY GT350", doors: 2, hp: 525, handling: 3, accel: 5, braking: 3, topSpeed: 160,
+    colors: { body: '#e0e0e0', accent: '#aaa', window: '#00d4ff', trim: '#1a3a5c', wheel: '#1a1a2e', light: '#ff2d95' }},
+  { driver: "HENRY", car: "HONDA CIVIC", doors: 4, hp: 250, handling: 4, accel: 2, braking: 3, topSpeed: 135,
+    colors: { body: '#4caf50', accent: '#2e7d32', window: '#00d4ff', trim: '#333', wheel: '#1a1a2e', light: '#ffe44d' }},
+];
+
+function drawPixelCar(canvas, carData) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = 60;
+  canvas.height = 25;
+  const c = carData.colors;
+  const is4Door = carData.doors === 4;
+
+  // Helper
+  const px = (x, y, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 1, 1);
+  };
+  const rect = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+  };
+
+  // Shadow
+  rect(10, 22, 40, 2, 'rgba(0,0,0,0.4)');
+  rect(8, 23, 44, 1, 'rgba(0,0,0,0.2)');
+
+  // --- Body base (rear-view Outrun style, slightly angled) ---
+
+  // Main body lower
+  rect(10, 14, 40, 6, c.body);
+  // Body upper/cabin
+  rect(16, 8, 28, 6, c.body);
+  // Roof
+  rect(18, 6, 24, 2, c.accent);
+  rect(20, 5, 20, 1, c.accent);
+
+  // Windshield / rear window
+  rect(18, 8, 10, 5, c.window);
+  rect(32, 8, 10, 5, c.window);
+
+  // Window glow
+  ctx.fillStyle = 'rgba(0, 212, 255, 0.3)';
+  ctx.fillRect(19, 9, 8, 3);
+  ctx.fillRect(33, 9, 8, 3);
+
+  // Pillar (A/B/C)
+  rect(17, 7, 1, 6, c.trim);
+  rect(28, 7, 1, 6, c.trim); // Center/B pillar
+  rect(42, 7, 1, 6, c.trim);
+
+  if (is4Door) {
+    // Additional pillar for 4-door
+    rect(23, 8, 1, 5, c.trim);
+    rect(37, 8, 1, 5, c.trim);
+    // Door lines
+    rect(22, 14, 1, 5, c.accent);
+    rect(37, 14, 1, 5, c.accent);
+  }
+
+  // Door line center
+  rect(29, 8, 2, 11, c.accent);
+
+  // Bumper
+  rect(8, 19, 44, 1, c.trim);
+  rect(7, 20, 46, 1, '#222');
+
+  // Front/bottom trim
+  rect(12, 20, 36, 1, c.accent);
+
+  // Headlights (left)
+  rect(8, 15, 3, 3, c.light);
+  px(8, 14, c.light);
+  // Headlights (right)
+  rect(49, 15, 3, 3, c.light);
+  px(51, 14, c.light);
+
+  // Headlight glow
+  ctx.fillStyle = `${c.light}66`;
+  rect(5, 15, 3, 2);
+  rect(52, 15, 3, 2);
+
+  // Taillights / side markers
+  rect(9, 14, 2, 1, '#ff2d95');
+  rect(49, 14, 2, 1, '#ff2d95');
+
+  // Wheels (pixel style)
+  rect(13, 20, 6, 3, c.wheel);
+  rect(14, 21, 4, 1, '#444');
+  rect(41, 20, 6, 3, c.wheel);
+  rect(42, 21, 4, 1, '#444');
+
+  // Wheel shine
+  px(15, 20, '#666');
+  px(43, 20, '#666');
+
+  // Hood scoop or detail
+  rect(28, 5, 4, 1, c.trim);
+
+  // Side stripe (Outrun style!)
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  rect(10, 16, 40, 1);
+
+  // Side vent marks for sports cars
+  if (!is4Door) {
+    rect(12, 15, 3, 1, c.accent);
+    rect(45, 15, 3, 1, c.accent);
+  }
+
+  // Ground reflection
+  ctx.fillStyle = `${c.body}33`;
+  rect(12, 24, 36, 1);
+}
+
+function createStatBar(label, value, maxVal, className) {
+  const pct = (value / maxVal) * 100;
+  return `
+    <div class="stat-row">
+      <div class="stat-label">${label}</div>
+      <div class="stat-bar-bg">
+        <div class="stat-bar-fill ${className}" style="width: 0%" data-target="${pct}"></div>
+        <div class="stat-value">${value}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCards() {
+  const grid = document.getElementById('carGrid');
+
+  cars.forEach((car, i) => {
+    const card = document.createElement('div');
+    card.className = 'car-card';
+    card.innerHTML = `
+      <div class="door-badge">${car.doors}-DOOR</div>
+      <div class="driver-name">${car.driver}</div>
+      <div class="car-name">${car.car} · ${car.hp} HP</div>
+      <div class="pixel-car-container">
+        <canvas id="car-canvas-${i}"></canvas>
+      </div>
+      <div class="road-strip"></div>
+      <div class="stats-grid">
+        ${createStatBar('POWER', car.hp, 550, 'hp')}
+        ${createStatBar('HANDLING', car.handling, 5, 'handling')}
+        ${createStatBar('ACCEL', car.accel, 5, 'accel')}
+        ${createStatBar('BRAKING', car.braking, 5, 'braking')}
+        ${createStatBar('TOP SPD', car.topSpeed, 200, 'topspeed')}
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.car-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+
+    grid.appendChild(card);
+
+    // Draw pixel car
+    const canvas = document.getElementById(`car-canvas-${i}`);
+    drawPixelCar(canvas, car);
+  });
+
+  // Animate stat bars
+  setTimeout(() => {
+    document.querySelectorAll('.stat-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  }, 500);
+}
+
+renderCards();
+</script>
+</body>
+</html>
