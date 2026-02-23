@@ -64,7 +64,7 @@ var CARS = [
 # Soundtrack data
 var TRACKS = [
 	{"name":"WHITE VACANCY", "artist":"ZISO",
-	 "file":"res://audio/Theme Songs/ZISO - White Vacancy.mp3"},
+	 "file":"res://audio/ZISO - White Vacancy.mp3"},
 	{"name":"TURBO POWER",   "artist":"2050",
 	 "file":"res://audio/2050 - Turbo Power.mp3"},
 	{"name":"PINKY POP",     "artist":"Danny Shields",
@@ -377,6 +377,7 @@ func _build_grid_floor() -> void:
 	var rect      := ColorRect.new()
 	rect.size      = Vector2(SW, SH - HORIZON_Y + 2.0)
 	rect.position  = Vector2(0.0, HORIZON_Y - 2.0)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var mat        := ShaderMaterial.new()
 	mat.shader     = load("res://shaders/grid_floor.gdshader")
 	rect.material  = mat
@@ -386,6 +387,7 @@ func _build_scanline() -> void:
 	var rect      := ColorRect.new()
 	rect.size      = Vector2(SW, SH)
 	rect.z_index   = 200
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var mat        := ShaderMaterial.new()
 	mat.shader     = load("res://shaders/scanline.gdshader")
 	rect.material  = mat
@@ -396,10 +398,32 @@ func _build_audio() -> void:
 	add_child(_announcer)
 	_music = AudioStreamPlayer.new()
 	add_child(_music)
-	var sfx = _try_load("res://audio/Choose_your_driver.mp3")
+	_announcer.finished.connect(_on_announcer_finished)
+	var sfx = _try_load("res://audio/Choose your driver.mp3")
 	if sfx != null:
 		_announcer.stream = sfx
 		_announcer.play()
+	else:
+		_start_bg_music()
+
+func _on_announcer_finished() -> void:
+	if not _confirming:
+		_start_bg_music()
+
+func _start_bg_music() -> void:
+	if _music.playing:
+		return
+	var stream = _try_load(str(TRACKS[0]["file"]))
+	if stream == null:
+		return
+	if stream is AudioStreamMP3:
+		(stream as AudioStreamMP3).loop = true
+	elif stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+	elif stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	_music.stream = stream
+	_music.play()
 
 # ── Pixel-art car texture ─────────────────────────────────────────────────────
 func _build_car_textures() -> void:
@@ -556,7 +580,7 @@ func _confirm_car() -> void:
 	var ti := _track_index if _track_index >= 0 else 0
 	GameState.selected_music_file = TRACKS[ti]["file"]
 
-	var sfx = _try_load("res://audio/Good_choice.mp3")
+	var sfx = _try_load("res://audio/Good choice.mp3")
 	if sfx != null:
 		_music.stop()
 		_announcer.stream = sfx

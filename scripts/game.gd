@@ -69,7 +69,7 @@ func _ready() -> void:
 	# Start the race music
 	var music := GameState.selected_music_file
 	if music.is_empty():
-		music = "res://audio/Theme Songs/ZISO - White Vacancy.mp3"
+		music = "res://audio/ZISO - White Vacancy.mp3"
 	AudioManager.play_music_file(music)
 
 func _build_scene() -> void:

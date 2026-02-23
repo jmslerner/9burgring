@@ -2,10 +2,12 @@ class_name Player
 extends Node2D
 
 # ── Car stats (overwritten by car_select.gd before scene load) ───────────────
-var max_speed:    float = 3200.0  # world-units / second at top speed
-var acceleration: float = 1100.0  # world-units / second²
-var deceleration: float = 750.0   # natural slow-down when not pressing gas
-var brake_force:  float = 2200.0  # braking deceleration
+# Speed multiplier: top_speed_mph * 40 = max_speed world-units/sec
+# Display: speed * 0.025 = mph shown on HUD  (= speed / 40)
+var max_speed:    float = 6400.0  # 160 mph * 40
+var acceleration: float = 1800.0  # accel=3 baseline
+var deceleration: float = 625.0   # natural slow-down when not pressing gas
+var brake_force:  float = 5000.0  # braking=3 baseline
 var handling:     float = 3.0     # lateral responsiveness (1=loose 5=tight)
 
 # ── Runtime state ─────────────────────────────────────────────────────────────
@@ -32,16 +34,16 @@ var _boost_mult:  float = 1.0   # current max_speed multiplier (1.0 = normal)
 
 # ─────────────────────────────────────────────────────────────────────────────
 func apply_car_stats(stats: Dictionary) -> void:
-	# Maps car-select roster keys (top_speed km/h, accel/braking/handling 1-5)
-	# to physics world-unit values used each frame.
+	# top_speed (mph) * 40 = world-units/sec; display with speed * 0.025
+	# accel/braking 1–5 use wide lerp ranges so every point is felt
 	var ts: float = float(stats.get("top_speed", 160))
 	var ac: float = float(stats.get("accel",     3))
 	var br: float = float(stats.get("braking",   3))
 	handling     = float(stats.get("handling",   3))
-	max_speed    = ts * 20.0
-	acceleration = lerp(700.0,  1600.0, (ac - 1.0) / 4.0)
-	deceleration = lerp(500.0,  1000.0, (ac - 1.0) / 4.0)
-	brake_force  = lerp(1200.0, 3600.0, (br - 1.0) / 4.0)
+	max_speed    = ts * 40.0
+	acceleration = lerp(600.0,  3000.0, (ac - 1.0) / 4.0)
+	deceleration = lerp(350.0,   900.0, (ac - 1.0) / 4.0)
+	brake_force  = lerp(2500.0, 7500.0, (br - 1.0) / 4.0)
 
 func apply_speed_boost(duration: float, mult: float) -> void:
 	_boost_t    = duration
@@ -126,4 +128,4 @@ func _update_sprite() -> void:
 
 # ─────────────────────────────────────────────────────────────────────────────
 func get_speed_mph() -> int:
-	return int(speed * 0.031)
+	return int(speed * 0.025)   # 1/40 matches the speed multiplier
