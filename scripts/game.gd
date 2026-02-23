@@ -310,14 +310,14 @@ func _on_wall_hit() -> void:
 # ── Road bump camera bob ───────────────────────────────────────────────────────
 func _tick_bump(dt: float) -> void:
 	var seg        := _track.get_segment(_player.position_z)
-	var now_bump   := seg.is_bump
+	var bump_mag   := seg.bump_mag
 
 	# Rising edge: player just crossed onto a bump segment
-	if now_bump and not _on_bump:
+	if bump_mag > 0.0 and not _on_bump:
 		var speed_ratio := _player.speed / _player.max_speed
-		_bump_amp   = speed_ratio * 32.0   # up to 32 px at top speed
+		_bump_amp   = speed_ratio * 32.0 * bump_mag   # mild≈10 px  dramatic≈32 px
 		_bump_phase = 0.0
-	_on_bump = now_bump
+	_on_bump = bump_mag > 0.0
 
 	# Advance oscillation and apply decay
 	if _bump_amp > 0.5:
