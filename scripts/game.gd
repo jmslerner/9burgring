@@ -27,7 +27,10 @@ var _lbl_timer:      Label
 var _lbl_speed:      Label
 var _lbl_checkpoint: Label
 var _lbl_countdown:  Label
+var _lbl_stage:      Label
 var _overlay:        ColorRect   # game-over / finish screen
+
+const STAGE_NAMES := ["SANTA CRUZ", "FELTON", "THE CLIMB", "LOS GATOS"]
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -86,6 +89,9 @@ func _build_hud() -> void:
 
 	_lbl_countdown         = _make_label("", Vector2(430, 250), 64)
 	_lbl_countdown.add_theme_color_override("font_color", Color.WHITE)
+
+	_lbl_stage             = _make_label("STAGE 1  SANTA CRUZ", Vector2(10, 40), 16)
+	_lbl_stage.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 
 	_overlay               = ColorRect.new()
 	_overlay.color         = Color(0, 0, 0, 0.7)
@@ -161,17 +167,20 @@ func _do_end_screen() -> void:
 func _on_checkpoint_passed(idx: int) -> void:
 	_checkpoints_hit += 1
 	_time_left       += CHECKPOINT_BONUS
-	_lbl_checkpoint.text = "CHECKPOINT! +%ds" % int(CHECKPOINT_BONUS)
 	AudioManager.play_sfx("checkpoint")
 
 	# All checkpoints cleared → finish
 	if _checkpoints_hit >= _total_checkpoints:
 		_trigger_finish()
-	else:
-		# Clear message after 2 s
-		await get_tree().create_timer(2.0).timeout
-		if _state == State.RACING:
-			_lbl_checkpoint.text = ""
+		return
+
+	# Advance stage label
+	var stage := _checkpoints_hit + 1
+	_lbl_stage.text = "STAGE %d  %s" % [stage, STAGE_NAMES[stage - 1]]
+	_lbl_checkpoint.text = "CHECKPOINT! +%ds" % int(CHECKPOINT_BONUS)
+	await get_tree().create_timer(2.0).timeout
+	if _state == State.RACING:
+		_lbl_checkpoint.text = ""
 
 func _trigger_gameover() -> void:
 	_state = State.GAMEOVER
