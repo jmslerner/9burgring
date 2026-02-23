@@ -26,6 +26,7 @@ var track: Track
 
 # Internal
 var _passed_checkpoints: Array[int] = []
+var _finished: bool = false
 
 # ─────────────────────────────────────────────────────────────────────────────
 func apply_car_stats(stats: Dictionary) -> void:
@@ -40,6 +41,7 @@ func reset() -> void:
 	position_z = 0.0
 	position_x = 0.0
 	off_road   = false
+	_finished  = false
 	_passed_checkpoints.clear()
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,9 +81,10 @@ func _handle_input(dt: float) -> void:
 
 func _update_position(dt: float) -> void:
 	position_z += speed * dt
-	if track != null and position_z >= track.track_length:
+	if not _finished and track != null and position_z >= track.track_length:
 		position_z = track.track_length
 		speed = 0.0
+		_finished = true
 		track_finished.emit()
 
 func _check_checkpoints() -> void:

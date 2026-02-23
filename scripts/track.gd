@@ -6,6 +6,13 @@ const SEGMENT_LENGTH := 200.0
 # How many segments form one rumble-strip alternation
 const RUMBLE_LENGTH  := 3
 
+# ── Scenery object types ──────────────────────────────────────────────────────
+const SCENERY_NONE      := 0
+const SCENERY_REDWOOD   := 1   # tall thin trunk, narrow canopy  (stages 1-2)
+const SCENERY_PINE      := 2   # triangular silhouette            (stage 3)
+const SCENERY_GUARDRAIL := 3   # post + horizontal beam           (stage 3 hairpins)
+const SCENERY_OAK       := 4   # shorter, wider canopy            (stage 4)
+
 # ── Segment ──────────────────────────────────────────────────────────────────
 class Segment:
 	var index:         int
@@ -14,6 +21,8 @@ class Segment:
 	var color_index:   int    # 0 or 1, alternates every RUMBLE_LENGTH segs
 	var is_checkpoint: bool
 	var stage:         int    # 1=Santa Cruz, 2=Felton, 3=Climb, 4=Descent
+	var scenery_l:     int    # left roadside object  (SCENERY_* constant)
+	var scenery_r:     int    # right roadside object
 
 	func _init(i: int, s: int = 1) -> void:
 		index         = i
@@ -22,6 +31,8 @@ class Segment:
 		color_index   = (i / Track.RUMBLE_LENGTH) % 2
 		is_checkpoint = false
 		stage         = s
+		scenery_l     = Track.SCENERY_NONE
+		scenery_r     = Track.SCENERY_NONE
 
 # ── Track ─────────────────────────────────────────────────────────────────────
 var segments: Array[Segment] = []
@@ -111,6 +122,31 @@ func _build_track() -> void:
 	_straight(20, 4)                        # final straight into Los Gatos
 
 	track_length = float(segments.size()) * SEGMENT_LENGTH
+	_assign_scenery()
+
+# ── Scenery placement ─────────────────────────────────────────────────────────
+func _assign_scenery() -> void:
+	for seg: Segment in segments:
+		var alt := seg.index % 2 == 0   # alternate segments for natural spacing
+		match seg.stage:
+			1:  # Santa Cruz → Felton: open city exit, then dense redwood forest
+				if seg.index >= 12 and alt:
+					seg.scenery_l = SCENERY_REDWOOD
+					seg.scenery_r = SCENERY_REDWOOD
+			2:  # Felton → Boulder Creek: redwoods with town gap breaks
+				if alt and (seg.index % 14) > 3:
+					seg.scenery_l = SCENERY_REDWOOD
+					seg.scenery_r = SCENERY_REDWOOD
+			3:  # The Climb: pine forest, guardrails replace pines on hairpins
+				if alt:
+					seg.scenery_l = SCENERY_PINE
+					seg.scenery_r = SCENERY_PINE
+				if absf(seg.curve) > 0.005:
+					seg.scenery_l = SCENERY_GUARDRAIL
+					seg.scenery_r = SCENERY_GUARDRAIL
+			4:  # Descent: oaks on right side only (open valley view on left)
+				if seg.index >= 740 and seg.index % 3 == 0:
+					seg.scenery_r = SCENERY_OAK
 
 # ── Query ─────────────────────────────────────────────────────────────────────
 

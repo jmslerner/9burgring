@@ -133,7 +133,6 @@ func _do_countdown(dt: float) -> void:
 		if _countdown < -0.4:
 			_lbl_countdown.visible = false
 			_state = State.RACING
-			AudioManager.play_music("stage1")
 
 func _do_racing(dt: float) -> void:
 	# Feed player state to renderer
@@ -148,7 +147,9 @@ func _do_racing(dt: float) -> void:
 		return
 
 	# Update engine audio
-	AudioManager.update_engine(_player.speed / _player.max_speed)
+	var accel := Input.is_action_pressed("accelerate")
+	var brake := Input.is_action_pressed("brake")
+	AudioManager.update_engine(_player.speed / _player.max_speed, accel, brake)
 
 	# HUD
 	var secs   := int(ceil(_time_left))

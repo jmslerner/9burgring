@@ -179,7 +179,59 @@ func _draw_road_strips() -> void:
 			_quad(far.sx,  y_top, far.sw  * 0.015,
 				  near.sx, y_bot, near.sw * 0.015, C_LANE)
 
+		# ── Roadside scenery ───────────────────────────────────────────────
+		var sc := near.sw / ROAD_WIDTH
+		if near.seg.scenery_r != 0:
+			_draw_scenery(near.seg.scenery_r, near.sx + near.sw * 1.22, y_bot, sc)
+		if near.seg.scenery_l != 0:
+			_draw_scenery(near.seg.scenery_l, near.sx - near.sw * 1.22, y_bot, sc)
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+# ── Scenery drawing ───────────────────────────────────────────────────────────
+
+func _draw_scenery(type: int, x: float, y_base: int, sc: float) -> void:
+	match type:
+		Track.SCENERY_REDWOOD:   _draw_redwood(x, y_base, sc)
+		Track.SCENERY_PINE:      _draw_pine(x, y_base, sc)
+		Track.SCENERY_GUARDRAIL: _draw_guardrail(x, y_base, sc)
+		Track.SCENERY_OAK:       _draw_oak(x, y_base, sc)
+
+func _draw_redwood(x: float, y_base: int, sc: float) -> void:
+	var tw := maxf(sc * 70.0,  2.0)
+	var th  := sc * 500.0
+	var cw := maxf(sc * 300.0, 3.0)
+	var ch  := sc * 2000.0
+	draw_rect(Rect2(x - tw * 0.5, y_base - th,       tw, th), Color("#5A3010"))
+	draw_rect(Rect2(x - cw * 0.5, y_base - th - ch,  cw, ch), Color("#173A17"))
+
+func _draw_pine(x: float, y_base: int, sc: float) -> void:
+	var hw := maxf(sc * 320.0, 2.0)
+	var h   := sc * 1600.0
+	draw_colored_polygon(
+		PackedVector2Array([
+			Vector2(x,      y_base - h),
+			Vector2(x + hw, float(y_base)),
+			Vector2(x - hw, float(y_base)),
+		]),
+		PackedColorArray([Color("#163818"), Color("#163818"), Color("#163818")])
+	)
+
+func _draw_guardrail(x: float, y_base: int, sc: float) -> void:
+	var pw := maxf(sc * 40.0,  1.0)
+	var ph  := sc * 280.0
+	var bh := maxf(sc * 55.0,  1.0)
+	var bw := maxf(sc * 300.0, 2.0)
+	draw_rect(Rect2(x - pw * 0.5, y_base - ph,        pw, ph), Color("#707070"))
+	draw_rect(Rect2(x - bw * 0.5, y_base - ph * 0.65, bw, bh), Color("#C0C0C0"))
+
+func _draw_oak(x: float, y_base: int, sc: float) -> void:
+	var tw := maxf(sc * 90.0,  2.0)
+	var th  := sc * 380.0
+	var cw := maxf(sc * 650.0, 3.0)
+	var ch  := sc * 850.0
+	draw_rect(Rect2(x - tw * 0.5, y_base - th,       tw, th), Color("#4A2A0A"))
+	draw_rect(Rect2(x - cw * 0.5, y_base - th - ch,  cw, ch), Color("#2A5C18"))
 
 # Draw a perspective trapezoid centred on x1/x2
 func _quad(x1: float, y1: int, w1: float,
