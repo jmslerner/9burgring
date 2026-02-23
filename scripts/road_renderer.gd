@@ -114,9 +114,13 @@ func _project_segments() -> void:
 	var start   := int(player_z / seg_len) % track.segments.size()
 	var cam_z   := fmod(player_z, seg_len)  # how far into the current segment
 
-	# Accumulated curve/hill offsets applied while iterating
-	var acc_x := 0.0
-	var acc_y := 0.0
+	# Accumulated curve/hill offsets applied while iterating.
+	# Curves use DOUBLE integration (velocity → position) so that scale * acc_x
+	# grows linearly with distance and the road visibly bends.
+	# Hills use single integration (world-height offset scaled by perspective).
+	var acc_curve := 0.0   # lateral "velocity" — integral of curvature
+	var acc_x     := 0.0   # lateral "position" — integral of acc_curve
+	var acc_y     := 0.0   # vertical offset (world units)
 
 	for i in range(DRAW_DIST):
 		var idx := (start + i) % track.segments.size()
@@ -126,9 +130,11 @@ func _project_segments() -> void:
 		var z_dist := float(i) * seg_len - cam_z + seg_len
 		var scale  := CAM_DEPTH * SH / z_dist
 
-		# Accumulate curve / hill
-		acc_x += seg.curve * seg_len
-		acc_y += seg.hill  * seg_len
+		# Double-integrate curve: curvature → lateral velocity → lateral position.
+		# This gives acc_x ∝ i², so scale * acc_x ∝ i → visible bend in distance.
+		acc_curve += seg.curve * seg_len
+		acc_x     += acc_curve
+		acc_y     += seg.hill  * seg_len
 
 		# Project road centre to screen.
 		# Near segments → large sy (bottom of screen)

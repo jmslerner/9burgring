@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1771818444
+::res://::1771826910
 CHANGELOG.md::TextFile::-1::1771818443::0::1::::<><><>0<>0<><>::
 default_bus_layout.tres::AudioBusLayout::-1::1771818444::0::1::::<><><>0<>0<><>::
 icon.svg::CompressedTexture2D::8406294325178529406::1771818444::1771818445::1::::<><><>0<>0<>7ae932edbd46e7970ae726be9a682cb8<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
@@ -26,7 +26,7 @@ blipkit.gdextension::GDExtension::7361066466048639276::1771818443::0::1::::<><><
 ::res://addons/detomon.blipkit/bin/macos/libblipkit.macos.template_release.universal.framework/Resources/::1771818443
 ::res://addons/detomon.blipkit/bin/web/::1771818443
 ::res://addons/detomon.blipkit/bin/windows/::1771818443
-::res://addons/detomon.blipkit/icons/::1771818443
+::res://addons/detomon.blipkit/icons/::1771818445
 audio_stream_blipkit.svg::CompressedTexture2D::4306890974654057680::1771818443::1771818445::1::::<><><>0<>0<>1eaa68aaa07bf63b12da142287841062<>res://.godot/imported/audio_stream_blipkit.svg-d87ea0f7918986ce08759fbaa5f85bf6.ctex::
 blipkit_bytecode.svg::CompressedTexture2D::1666017231710681022::1771818443::1771818445::1::::<><><>0<>0<>052230940d3a82aaecd4c580da45fcc8<>res://.godot/imported/blipkit_bytecode.svg-7d768567505e724250046a2e8aff005f.ctex::
 blipkit_instrument.svg::CompressedTexture2D::4611368206838260500::1771818443::1771818445::1::::<><><>0<>0<>55609d1042451a5bd409d29f4cb01a2d<>res://.godot/imported/blipkit_instrument.svg-f5ab22b99bbe4b4016c7f858992045b9.ctex::
@@ -37,13 +37,17 @@ blipkit_waveform.svg::CompressedTexture2D::6945364135169869867::1771818443::1771
 ::res://assets/audio/music/::1771802887
 ::res://assets/audio/sfx/::1771802887
 ::res://assets/sprites/::1771802887
-::res://audio/::1771814734
+::res://audio/::1771824919
 2050 - Turbo Power.mp3::AudioStreamMP3::7259036096480060736::1771805875::1771808677::1::::<><><>0<>0<>1b97c18508d8d2d65fd0aeed749240f2<>res://.godot/imported/2050 - Turbo Power.mp3-3127bc92f68bd18807e932de767026a1.mp3str::
 Choose your driver.mp3::AudioStreamMP3::6108295720036050691::1771805408::1771808677::1::::<><><>0<>0<>48786e8f9c9d144fe4b07d3cb2209424<>res://.godot/imported/Choose your driver.mp3-3ef8c1848bc312fd763e1dd50d2754f2.mp3str::
 engine_accel.mp3::AudioStreamMP3::8196418706566431403::1771812887::1771814734::1::::<><><>0<>0<>48b79c631d57c0db16b1630da3e5d0b7<>res://.godot/imported/engine_accel.mp3-30f2978d07c9f24a8cd708277aca1c7a.mp3str::
 engine_decel.mp3::AudioStreamMP3::2664848272057664800::1771812887::1771814734::1::::<><><>0<>0<>016846f811979de8fe501615c6188982<>res://.godot/imported/engine_decel.mp3-7c456517234f06babb06222a8dee3dcd.mp3str::
 Good choice.mp3::AudioStreamMP3::6642634299578542692::1771805404::1771808677::1::::<><><>0<>0<>418c28438ff386fdf64dc635835c01a5<>res://.godot/imported/Good choice.mp3-ddf3497e56b5c5f261d9784675a98468.mp3str::
-ZISO - White Vacancy.mp3::AudioStreamMP3::7109991298455148369::1771805907::1771808677::1::::<><><>0<>0<>e9988cffe566355a0e642fce33ac77c7<>res://.godot/imported/ZISO - White Vacancy.mp3-d34276dea28383cfd2a96d692570a2e4.mp3str::
+ZISO - White Vacancy.mp3::AudioStreamMP3::7109991298455148369::1771824919::1771808677::1::::<><><>0<>0<>e9988cffe566355a0e642fce33ac77c7<>res://.godot/imported/ZISO - White Vacancy.mp3-d34276dea28383cfd2a96d692570a2e4.mp3str::
+::res://audio/Theme Songs/::1771824965
+Danny Shields - Pinky Pop.mp3::AudioStreamMP3::4033514653931423442::1771819451::1771826911::1::::<><><>0<>0<>6e939e6becc26fe809dd0924e74a5972<>res://.godot/imported/Danny Shields - Pinky Pop.mp3-159a9ecd4a2de09cd7290286827276a3.mp3str::
+Night Rider 87 - Enids Theme.mp3::AudioStreamMP3::8024153596055931281::1771819473::1771826911::1::::<><><>0<>0<>a3cd4687e02c5c4e0187e30109380020<>res://.godot/imported/Night Rider 87 - Enids Theme.mp3-ea0cf6043edfe7ff3155c22cdfc51e0d.mp3str::
+ZISO - White Vacancy.mp3::AudioStreamMP3::4524127504737473032::1771805907::1771826911::1::::<><><>0<>0<>11f12881cbd42f13bc96fba77639123f<>res://.godot/imported/ZISO - White Vacancy.mp3-cc98e38d26322d0976b4894a131edafe.mp3str::
 ::res://examples/::1771818444
 ::res://examples/bytecode/::1771818444
 bytecode.gd::GDScript::5164592437168381805::1771818444::0::1::::<>Control<><>0<>0<><>::
@@ -61,7 +65,7 @@ power_on_assembler.tscn::PackedScene::993750442897999894::1771818444::0::1::::<>
 ::res://examples/shared/oscilloscope/::1771818444
 oscilloscope.gd::GDScript::1393634102369046490::1771818444::0::1::::<>Control<><>0<>1<><>::
 oscilloscope.tscn::PackedScene::1260655866541014938::1771818444::0::1::::<><><>0<>0<><>::uid://t4c7ki5y36fu::::res://examples/shared/oscilloscope/oscilloscope.gd
-::res://examples/shared/samples/::1771818444
+::res://examples/shared/samples/::1771818445
 drum1.wav::AudioStreamWAV::5477932350397471260::1771818444::1771818445::1::::<><><>0<>0<>7a0bc03c9c812a5f84892f1596c3dfc1<>res://.godot/imported/drum1.wav-c8b96d79c8c3ed67f99a0ef088e7c900.sample::
 drum2.wav::AudioStreamWAV::2592470618096962758::1771818444::1771818445::1::::<><><>0<>0<>bac0e253398af95ea2e30e2b9075018b<>res://.godot/imported/drum2.wav-7e73de95b2b6faeb76d764adcf8c8838.sample::
 hat2.wav::AudioStreamWAV::8213475450693104673::1771818444::1771818445::1::::<><><>0<>0<>65313a668611e0c9cd1c1bd9682a63b1<>res://.godot/imported/hat2.wav-23d15fe20de986b483d1fe34e61b1542.sample::
@@ -69,14 +73,14 @@ snare1.wav::AudioStreamWAV::889344839361809838::1771818444::1771818445::1::::<><
 ::res://scenes/::1771803709
 car_select.tscn::PackedScene::190740087695980759::1771803709::0::1::::<><><>0<>0<><>::uid://df4xjeqr5mdxj::::res://scripts/car_select.gd
 game.tscn::PackedScene::-1::1771803169::0::1::::<><><>0<>0<><>::res://scripts/game.gd
-::res://scripts/::1771818153
-audio_manager.gd::GDScript::169356029169182509::1771818153::0::1::::<>Node<><>0<>0<><>::
-car_select.gd::GDScript::7571486022739210755::1771818137::0::1::::<>Node2D<><>0<>0<><>::
-game.gd::GDScript::7906898594780703953::1771814770::0::1::::<>Node2D<><>0<>0<><>::
-game_state.gd::GDScript::8489164890799706817::1771803124::0::1::::<>Node<><>0<>0<><>::
-player.gd::GDScript::4939361414521713040::1771811883::0::1::::Player<>Node2D<><>0<>0<><>::
-road_renderer.gd::GDScript::398946543806444277::1771818103::0::1::::RoadRenderer<>Node2D<><>0<>0<><>::
-track.gd::GDScript::3985205478821008273::1771814146::0::1::::Track<>RefCounted<><>0<>0<><>::
+::res://scripts/::1771826558
+audio_manager.gd::GDScript::169356029169182509::1771821550::0::1::::<>Node<><>0<>0<><>::
+car_select.gd::GDScript::7571486022739210755::1771824941::0::1::::<>Node2D<><>0<>0<><>::
+game.gd::GDScript::7906898594780703953::1771824952::0::1::::<>Node2D<><>0<>0<><>::
+game_state.gd::GDScript::8489164890799706817::1771821531::0::1::::<>Node<><>0<>0<><>::
+player.gd::GDScript::4939361414521713040::1771825158::0::1::::Player<>Node2D<><>0<>0<><>::
+road_renderer.gd::GDScript::398946543806444277::1771826558::0::1::::RoadRenderer<>Node2D<><>0<>0<><>::
+track.gd::GDScript::3985205478821008273::1771821633::0::1::::Track<>RefCounted<><>0<>0<><>::
 ::res://shaders/::1771808677
 grid_floor.gdshader::Shader::6011489739296958287::1771806885::0::1::::<><><>0<>0<><>::
 scanline.gdshader::Shader::258181851186155052::1771806877::0::1::::<><><>0<>0<><>::

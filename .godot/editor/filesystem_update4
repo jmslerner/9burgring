@@ -1,3 +1,1 @@
-res://scripts/car_select.gd
-res://scripts/road_renderer.gd
-res://scripts/audio_manager.gd
+res://default_bus_layout.tres
