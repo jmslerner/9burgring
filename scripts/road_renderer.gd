@@ -64,6 +64,10 @@ var track:      Track
 var player_z:   float = 0.0   # distance travelled along track
 var player_x:   float = 0.0   # lateral offset in -1..1 range
 
+# ── Deer obstacle positions (set by game.gd each frame) ───────────────────────
+# Each entry: {z: float, x: float}
+var deer_list: Array = []
+
 # Current stage derived from projected segments each frame
 var _current_stage: int = 1
 
@@ -90,6 +94,7 @@ func _draw() -> void:
 	_project_segments()   # sets _current_stage before sky draw
 	_draw_sky()
 	_draw_road_strips()
+	_draw_deer_obstacles()
 
 # ── Sky + mountain silhouette ─────────────────────────────────────────────────
 func _draw_sky() -> void:
@@ -240,6 +245,61 @@ func _draw_oak(x: float, y_base: int, sc: float) -> void:
 	var ch  := sc * 850.0
 	draw_rect(Rect2(x - tw * 0.5, y_base - th,       tw, th), Color("#4A2A0A"))
 	draw_rect(Rect2(x - cw * 0.5, y_base - th - ch,  cw, ch), Color("#2A5C18"))
+
+# ── Deer rendering ────────────────────────────────────────────────────────────
+
+func _draw_deer_obstacles() -> void:
+	if deer_list.is_empty():
+		return
+	# Sort farthest-first so nearer deer are drawn on top (painter's algorithm)
+	var sorted: Array = deer_list.duplicate()
+	sorted.sort_custom(func(a, b): return float(a["z"]) > float(b["z"]))
+
+	for d in sorted:
+		var offset_z := float(d["z"]) - player_z
+		if offset_z <= 0.0 or offset_z > float(DRAW_DIST) * Track.SEGMENT_LENGTH:
+			continue
+		var pidx := int(offset_z / Track.SEGMENT_LENGTH)
+		if pidx >= _proj.size() - 1:
+			continue
+		var p  := _proj[pidx]
+		var sc := p.sw / ROAD_WIDTH
+		var sx := p.sx + float(d["x"]) * p.sw
+		_draw_deer_sprite(sx, int(p.sy), sc)
+
+func _draw_deer_sprite(x: float, y_base: int, sc: float) -> void:
+	var C_BODY := Color("#8B6340")
+	var C_ANTL := Color("#5C3D1A")
+
+	var lw := maxf(sc * 28.0,  2.0)   # leg width
+	var lh  := sc * 340.0              # leg height
+	var bw := maxf(sc * 250.0, 3.0)   # body width
+	var bh  := sc * 300.0              # body height
+	var hw := maxf(sc * 100.0, 2.0)   # head width
+	var hh  := sc * 190.0             # head + neck height
+
+	var y_feet := float(y_base)
+	var y_body := y_feet - lh
+	var y_head := y_body - bh
+
+	# Legs (two visible: front and rear)
+	draw_rect(Rect2(x - bw * 0.32 - lw, y_body, lw, lh), C_BODY)
+	draw_rect(Rect2(x + bw * 0.32,       y_body, lw, lh), C_BODY)
+	# Body
+	draw_rect(Rect2(x - bw * 0.5, y_head, bw, bh), C_BODY)
+	# Neck + head (offset forward — deer faces right by convention)
+	var hx := x + bw * 0.26
+	draw_rect(Rect2(hx - hw * 0.5, y_head - hh, hw, hh), C_BODY)
+	# Antlers
+	var ah := sc * 200.0
+	if ah >= 2.0:
+		var aw := maxf(sc * 18.0, 1.0)
+		# Left antler
+		draw_rect(Rect2(hx - aw * 3.0, y_head - hh - ah,          aw, ah),       C_ANTL)
+		draw_rect(Rect2(hx - aw * 6.5, y_head - hh - ah * 0.55,   aw * 3.5, aw), C_ANTL)
+		# Right antler
+		draw_rect(Rect2(hx + aw * 2.0, y_head - hh - ah,          aw, ah),       C_ANTL)
+		draw_rect(Rect2(hx + aw * 2.0, y_head - hh - ah * 0.55,   aw * 3.5, aw), C_ANTL)
 
 # Draw a perspective trapezoid centred on x1/x2
 func _quad(x1: float, y1: int, w1: float,

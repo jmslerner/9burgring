@@ -2,11 +2,11 @@ class_name Player
 extends Node2D
 
 # ── Car stats (overwritten by car_select.gd before scene load) ───────────────
-var max_speed:    float = 300.0   # world-units / second at top speed
-var acceleration: float = 120.0   # world-units / second²
-var deceleration: float = 200.0   # natural slow-down when not pressing gas
-var brake_force:  float = 400.0   # braking deceleration
-var handling:     float = 2.0     # lateral responsiveness (1=loose 3=tight)
+var max_speed:    float = 3200.0  # world-units / second at top speed
+var acceleration: float = 1100.0  # world-units / second²
+var deceleration: float = 750.0   # natural slow-down when not pressing gas
+var brake_force:  float = 2200.0  # braking deceleration
+var handling:     float = 3.0     # lateral responsiveness (1=loose 5=tight)
 
 # ── Runtime state ─────────────────────────────────────────────────────────────
 var speed:      float = 0.0   # current speed (world-units/s)
@@ -30,11 +30,16 @@ var _finished: bool = false
 
 # ─────────────────────────────────────────────────────────────────────────────
 func apply_car_stats(stats: Dictionary) -> void:
-	max_speed    = stats.get("max_speed",    300.0)
-	acceleration = stats.get("acceleration", 120.0)
-	deceleration = stats.get("deceleration", 200.0)
-	brake_force  = stats.get("brake_force",  400.0)
-	handling     = stats.get("handling",     2.0)
+	# Maps car-select roster keys (top_speed km/h, accel/braking/handling 1-5)
+	# to physics world-unit values used each frame.
+	var ts: float = float(stats.get("top_speed", 160))
+	var ac: float = float(stats.get("accel",     3))
+	var br: float = float(stats.get("braking",   3))
+	handling     = float(stats.get("handling",   3))
+	max_speed    = ts * 20.0
+	acceleration = lerp(700.0,  1600.0, (ac - 1.0) / 4.0)
+	deceleration = lerp(500.0,  1000.0, (ac - 1.0) / 4.0)
+	brake_force  = lerp(1200.0, 3600.0, (br - 1.0) / 4.0)
 
 func reset() -> void:
 	speed      = 0.0
@@ -106,5 +111,4 @@ func _update_sprite() -> void:
 
 # ─────────────────────────────────────────────────────────────────────────────
 func get_speed_kmh() -> int:
-	# Convert world-units/s to a display-friendly number
-	return int(speed * 0.8)
+	return int(speed / 20.0)

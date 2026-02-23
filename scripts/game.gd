@@ -6,6 +6,13 @@ extends Node2D
 const INITIAL_TIME     := 60.0   # seconds at race start
 const CHECKPOINT_BONUS := 20.0   # seconds added per checkpoint
 
+# ── Deer obstacle settings ─────────────────────────────────────────────────────
+const DEER_AHEAD      := 4000.0  # spawn deer this many world-units ahead of player
+const DEER_SPACING    := 700.0   # minimum world-unit gap between deer (+ random extra)
+const DEER_HIT_Z      := 280.0   # z-depth window for collision (world units)
+const DEER_HIT_X      := 0.30    # lateral half-width for collision
+const DEER_SPEED_MULT := 0.40    # speed multiplied by this on deer impact
+
 # ── States ────────────────────────────────────────────────────────────────────
 enum State { COUNTDOWN, RACING, GAMEOVER, FINISH }
 var _state: State = State.COUNTDOWN
@@ -28,7 +35,14 @@ var _lbl_speed:      Label
 var _lbl_checkpoint: Label
 var _lbl_countdown:  Label
 var _lbl_stage:      Label
+var _lbl_deer_hit:   Label
 var _overlay:        ColorRect   # game-over / finish screen
+
+# ── Deer state ────────────────────────────────────────────────────────────────
+# Each entry: {z: float, x: float}
+var _deer:          Array = []
+var _next_deer_z:   float = 3000.0   # world-z of next deer spawn
+var _deer_hit_t:    float = 0.0      # countdown timer for "DEER!" flash
 
 const STAGE_NAMES = ["SANTA CRUZ", "FELTON", "THE CLIMB", "LOS GATOS"]
 
@@ -94,6 +108,9 @@ func _build_hud() -> void:
 	_lbl_stage             = _make_label("STAGE 1  SANTA CRUZ", Vector2(10, 40), 16)
 	_lbl_stage.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 
+	_lbl_deer_hit          = _make_label("", Vector2(362, 260), 44)
+	_lbl_deer_hit.add_theme_color_override("font_color", Color(1.0, 0.55, 0.05))
+
 	_overlay               = ColorRect.new()
 	_overlay.color         = Color(0, 0, 0, 0.7)
 	_overlay.size          = Vector2(1024, 600)
@@ -146,6 +163,9 @@ func _do_racing(dt: float) -> void:
 		_trigger_gameover()
 		return
 
+	# Deer
+	_tick_deer(dt)
+
 	# Update engine audio
 	var accel := Input.is_action_pressed("accelerate")
 	var brake := Input.is_action_pressed("brake")
@@ -164,6 +184,46 @@ func _do_end_screen() -> void:
 		AudioManager.stop_engine()
 		AudioManager.stop_music()
 		get_tree().change_scene_to_file("res://scenes/car_select.tscn")
+
+# ── Deer obstacle system ──────────────────────────────────────────────────────
+
+func _tick_deer(dt: float) -> void:
+	# Spawn deer ahead of the player
+	var pz := _player.position_z
+	while _next_deer_z < pz + DEER_AHEAD and _next_deer_z < _track.track_length - 600.0:
+		_deer.append({"z": _next_deer_z, "x": randf_range(-0.72, 0.72)})
+		_next_deer_z += DEER_SPACING + randf_range(0.0, 500.0)
+
+	# Collision check and despawn (iterate backwards to safely remove)
+	var i := _deer.size() - 1
+	while i >= 0:
+		var d: Dictionary = _deer[i]
+		var dz: float = d["z"]
+		var dx: float = d["x"]
+		var dz_diff := dz - pz
+		if dz_diff < -400.0:
+			# Well behind the player — clean up
+			_deer.remove_at(i)
+		elif dz_diff >= 0.0 and dz_diff <= DEER_HIT_Z:
+			if absf(_player.position_x - dx) < DEER_HIT_X:
+				# Impact!
+				_player.speed *= DEER_SPEED_MULT
+				_deer.remove_at(i)
+				_deer_hit_t = 1.4
+				_lbl_deer_hit.text = "DEER!"
+				AudioManager.play_sfx("hit")
+		i -= 1
+
+	# Expire the deer-hit flash
+	if _deer_hit_t > 0.0:
+		_deer_hit_t -= dt
+		if _deer_hit_t <= 0.0:
+			_lbl_deer_hit.text = ""
+
+	# Update renderer
+	_renderer.deer_list.clear()
+	for d: Dictionary in _deer:
+		_renderer.deer_list.append({"z": d["z"], "x": d["x"]})
 
 # ── Checkpoint ────────────────────────────────────────────────────────────────
 func _on_checkpoint_passed(idx: int) -> void:
