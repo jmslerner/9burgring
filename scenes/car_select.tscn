@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://cynpxl7sbnb0"]
-
-[ext_resource type="Script" uid="uid://df4xjeqr5mdxj" path="res://scripts/car_select.gd" id="1_carsel"]
-
-[node name="CarSelect" type="Node2D" unique_id=1786643812]
-script = ExtResource("1_carsel")

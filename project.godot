@@ -16,13 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="9burgring"
 config/description="Touge outrun - pseudo-3D mountain pass racing"
-run/main_scene="res://scenes/car_select.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-
-[autoload]
-
-AudioManager="*res://scripts/audio_manager.gd"
-GameState="*res://scripts/game_state.gd"
 
 [display]
 
