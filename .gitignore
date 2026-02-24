@@ -2,6 +2,9 @@
 *.gen.*
 .godot/
 
+# Web export build artifacts
+build/
+
 # OS
 .DS_Store
 Thumbs.db

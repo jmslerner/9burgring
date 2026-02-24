@@ -111,6 +111,8 @@ func stop_engine() -> void:
 func _set_loop(stream: AudioStream, loop: bool) -> void:
 	if stream is AudioStreamOggVorbis:
 		(stream as AudioStreamOggVorbis).loop = loop
+	elif stream is AudioStreamMP3:
+		(stream as AudioStreamMP3).loop = loop
 	elif stream is AudioStreamWAV:
 		(stream as AudioStreamWAV).loop_mode = (
 			AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
