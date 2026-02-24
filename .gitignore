@@ -5,6 +5,9 @@
 # Web export build artifacts
 build/
 
+# Chromium Embedded Framework addon (1.5 GB binary — do not commit)
+addons/godot_cef/
+
 # OS
 .DS_Store
 Thumbs.db
