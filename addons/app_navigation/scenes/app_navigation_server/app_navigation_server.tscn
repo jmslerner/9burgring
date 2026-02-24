@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://enpbbfvix2ko"]
+
+[ext_resource type="Script" uid="uid://bm5b7j05p0hnn" path="res://addons/app_navigation/scenes/app_navigation_server/app_navigation_server.gd" id="1_lt3c5"]
+
+[node name="AppNavigationServer" type="Node"]
+script = ExtResource("1_lt3c5")

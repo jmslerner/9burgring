@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bh6vic4wg2001"
+path="res://.godot/imported/tatamusic-jazz-jazz-music-485401.mp3 (bass).mp3-d3b75f5e222ea1e8449194ec95160aa2.mp3str"
+
+[deps]
+
+source_file="res://addons/demo/sounds/Stems/tatamusic-jazz-jazz-music-485401.mp3 (bass).mp3"
+dest_files=["res://.godot/imported/tatamusic-jazz-jazz-music-485401.mp3 (bass).mp3-d3b75f5e222ea1e8449194ec95160aa2.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

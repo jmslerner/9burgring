@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AcousticMaterial" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/danikakes.spatial_audio/acoustic_material.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+absorption_low = 0.13
+absorption_mid = 0.20
+absorption_high = 0.24
+scattering = 0.20
+transmission_low = 0.015
+transmission_mid = 0.002
+transmission_high = 0.001

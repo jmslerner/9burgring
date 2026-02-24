@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://crpef0opn8yvk"]
+
+[ext_resource type="Script" uid="uid://b8rwwbg3gk77e" path="res://addons/app_navigation/scenes/app_ui/app_ui.gd" id="1_8do1p"]
+
+[node name="AppUi" type="Node"]
+script = ExtResource("1_8do1p")
+
+[node name="PageLayer" type="CanvasLayer" parent="."]
+
+[node name="PageContainer" type="Control" parent="PageLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
